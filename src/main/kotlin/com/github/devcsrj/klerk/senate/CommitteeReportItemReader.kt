@@ -1,5 +1,6 @@
 package com.github.devcsrj.klerk.senate
 
+import com.github.devcsrj.klerk.CommitteeReport
 import com.github.devcsrj.klerk.Congress
 import okhttp3.HttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull

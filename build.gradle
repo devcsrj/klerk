@@ -3,6 +3,7 @@ plugins {
     id 'org.jetbrains.kotlin.plugin.spring' version '1.3.50'
     id 'org.springframework.boot' version '2.1.8.RELEASE'
     id "io.spring.dependency-management" version "1.0.8.RELEASE"
+    id 'com.adarshr.test-logger' version '1.7.0'
     id "application"
 }
 
@@ -55,6 +56,7 @@ dependencies {
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit")
     testImplementation("org.spekframework.spek2:spek-dsl-jvm:${spekVersion}")
     testImplementation("com.squareup.okhttp3:mockwebserver:${okhttpVersion}")
+    testImplementation("org.hamcrest:hamcrest:2.1")
 
     testRuntime("org.junit.platform:junit-platform-launcher")
     testRuntime("org.junit.jupiter:junit-jupiter")
