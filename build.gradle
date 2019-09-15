@@ -15,6 +15,7 @@ ext {
     junit5Version = "5.5.1"
     spekVersion = "2.0.6"
     springBootVersion = "2.1.8.RELEASE"
+    okhttpVersion = "4.2.0"
 }
 
 repositories {
@@ -23,6 +24,12 @@ repositories {
 
 bootJar {
     baseName = 'klerk'
+}
+
+repositories {
+    mavenCentral()
+    mavenLocal()
+    jcenter()
 }
 
 dependencyManagement {
@@ -39,12 +46,15 @@ dependencyManagement {
 dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
     implementation("org.springframework.boot:spring-boot-starter-batch")
+    implementation("org.jsoup:jsoup:1.12.1")
+    implementation("com.squareup.okhttp3:okhttp:${okhttpVersion}")
 
     runtimeOnly("org.hsqldb:hsqldb")
 
     testImplementation("org.jetbrains.kotlin:kotlin-test")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit")
     testImplementation("org.spekframework.spek2:spek-dsl-jvm:${spekVersion}")
+    testImplementation("com.squareup.okhttp3:mockwebserver:${okhttpVersion}")
 
     testRuntime("org.junit.platform:junit-platform-launcher")
     testRuntime("org.junit.jupiter:junit-jupiter")
