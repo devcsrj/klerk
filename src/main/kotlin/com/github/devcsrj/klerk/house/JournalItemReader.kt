@@ -36,8 +36,8 @@ class JournalItemReader(
 
     companion object {
         private val DATE_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd")
-        private val KEY_SESSION = "session"
-        private val KEY_JOURNAL_NUMBER = "journalNumber"
+        private const val KEY_SESSION = "session"
+        private const val KEY_JOURNAL_NUMBER = "journalNumber"
     }
 
     init {

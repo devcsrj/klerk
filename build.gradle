@@ -46,9 +46,11 @@ dependencyManagement {
 
 dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.1")
     implementation("org.springframework.boot:spring-boot-starter-batch")
     implementation("org.jsoup:jsoup:1.12.1")
     implementation("com.squareup.okhttp3:okhttp:${okhttpVersion}")
+    implementation("com.squareup.okhttp3:okhttp-urlconnection:${okhttpVersion}")
 
     runtimeOnly("org.hsqldb:hsqldb")
 

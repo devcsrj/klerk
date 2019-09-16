@@ -79,7 +79,7 @@ object JournalItemReaderTest : Spek({
 
             var actual = 0
 
-            Given("one page") {
+            Given("all pages") {
                 for (i in 1..4) {
                     val path = "$baseDir/17th-session$i.html"
                     server.enqueue(

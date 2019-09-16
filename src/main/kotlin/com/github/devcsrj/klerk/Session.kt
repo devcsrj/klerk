@@ -8,6 +8,7 @@ data class Session(
     companion object {
 
         fun regular(number: Int) = Session(number, Type.REGULAR)
+        fun special(number: Int) = Session(number, Type.SPECIAL)
     }
 
     enum class Type {
