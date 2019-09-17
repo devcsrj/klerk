@@ -1,0 +1,6 @@
+klerk:
+  output-dir: ${user.dir}/build/klerk
+  house:
+    base-url: http://www.congress.gov.ph
+  senate:
+    base-url: http://www.senate.gov.ph

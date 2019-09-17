@@ -1,5 +1,6 @@
 package com.github.devcsrj.klerk.senate
 
+import com.github.devcsrj.klerk.Chamber
 import com.github.devcsrj.klerk.Congress
 import com.github.devcsrj.klerk.Journal
 import com.github.devcsrj.klerk.Session
@@ -222,6 +223,7 @@ class HttpJournalItemReader(
         }
 
         return Journal(
+            chamber = Chamber.SENATE,
             congress = congress,
             session = session,
             number = number,

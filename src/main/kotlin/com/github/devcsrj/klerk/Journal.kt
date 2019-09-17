@@ -4,6 +4,7 @@ import java.net.URI
 import java.time.LocalDate
 
 data class Journal(
+    val chamber: Chamber,
     val congress: Congress,
     val session: Session,
     val number: Int,

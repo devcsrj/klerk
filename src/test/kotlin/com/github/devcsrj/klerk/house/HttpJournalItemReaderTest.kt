@@ -1,5 +1,6 @@
 package com.github.devcsrj.klerk.house
 
+import com.github.devcsrj.klerk.Chamber
 import com.github.devcsrj.klerk.Congress
 import com.github.devcsrj.klerk.Journal
 import com.github.devcsrj.klerk.Session
@@ -65,6 +66,7 @@ object HttpJournalItemReaderTest : Spek({
 
             Then("it should get the journal") {
                 val expected = Journal(
+                    chamber = Chamber.HOUSE,
                     congress = congress,
                     session = Session.regular(1),
                     number = 1,

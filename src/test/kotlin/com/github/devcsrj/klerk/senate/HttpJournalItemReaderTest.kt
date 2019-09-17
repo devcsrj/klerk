@@ -1,9 +1,6 @@
 package com.github.devcsrj.klerk.senate
 
-import com.github.devcsrj.klerk.Congress
-import com.github.devcsrj.klerk.Journal
-import com.github.devcsrj.klerk.Session
-import com.github.devcsrj.klerk.enqueue
+import com.github.devcsrj.klerk.*
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.hamcrest.CoreMatchers.containsString
@@ -77,6 +74,7 @@ object HttpJournalItemReaderTest : Spek({
 
             Then("it should get the journal") {
                 val expected = Journal(
+                    chamber = Chamber.SENATE,
                     congress = congress,
                     session = Session.regular(1),
                     number = 1,

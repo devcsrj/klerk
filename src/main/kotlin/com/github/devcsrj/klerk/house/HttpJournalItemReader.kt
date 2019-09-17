@@ -1,5 +1,6 @@
 package com.github.devcsrj.klerk.house
 
+import com.github.devcsrj.klerk.Chamber
 import com.github.devcsrj.klerk.Congress
 import com.github.devcsrj.klerk.Journal
 import com.github.devcsrj.klerk.Session
@@ -121,6 +122,7 @@ class HttpJournalItemReader(
         val date = LocalDate.parse(tr.child(1).text(), DATE_FORMAT)
         val href = tr.child(2).selectFirst("a").attr("href")
         return Journal(
+            chamber = Chamber.HOUSE,
             congress = congress,
             session = session,
             number = number,
