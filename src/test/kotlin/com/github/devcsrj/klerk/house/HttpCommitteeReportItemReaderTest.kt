@@ -14,18 +14,18 @@ import java.util.concurrent.TimeUnit
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
 
-object CommitteeReportItemReaderTest : Spek({
+object HttpCommitteeReportItemReaderTest : Spek({
 
     val baseDir = "/house/cr"
     val congress = Congress(18)
 
     Feature("Item reader") {
         lateinit var server: MockWebServer
-        lateinit var reader: CommitteeReportItemReader
+        lateinit var reader: HttpCommitteeReportItemReader
 
         beforeGroup {
             server = MockWebServer()
-            reader = CommitteeReportItemReader(server.url("/").toUri(), congress)
+            reader = HttpCommitteeReportItemReader(server.url("/").toUri(), congress)
         }
 
         afterGroup {

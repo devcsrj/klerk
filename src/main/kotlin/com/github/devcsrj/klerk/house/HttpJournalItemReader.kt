@@ -18,7 +18,7 @@ import java.time.format.DateTimeFormatter
 import java.util.*
 import kotlin.NoSuchElementException
 
-class JournalItemReader(
+class HttpJournalItemReader(
     private val url: URI,
     private val congress: Congress
 ) : AbstractItemStreamItemReader<Journal>() {
@@ -41,7 +41,7 @@ class JournalItemReader(
     }
 
     init {
-        setName(ClassUtils.getShortName(JournalItemReader::class.java))
+        setName(ClassUtils.getShortName(HttpJournalItemReader::class.java))
         baseUrl = url.toHttpUrlOrNull() ?: throw IllegalArgumentException("Not a valid url: $url")
     }
 

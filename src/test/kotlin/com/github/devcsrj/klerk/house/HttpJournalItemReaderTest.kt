@@ -13,18 +13,18 @@ import java.time.Month
 import java.util.concurrent.TimeUnit
 import kotlin.test.assertEquals
 
-object JournalItemReaderTest : Spek({
+object HttpJournalItemReaderTest : Spek({
 
     val baseDir = "/house/journal"
     val congress = Congress(17)
 
     Feature("Item reader") {
         lateinit var server: MockWebServer
-        lateinit var reader: JournalItemReader
+        lateinit var readerHttp: HttpJournalItemReader
 
         beforeGroup {
             server = MockWebServer()
-            reader = JournalItemReader(server.url("/").toUri(), congress)
+            readerHttp = HttpJournalItemReader(server.url("/").toUri(), congress)
         }
 
         afterGroup {
@@ -46,11 +46,11 @@ object JournalItemReaderTest : Spek({
                                 .readText()
                         )
                 )
-                reader.open(ExecutionContext())
+                readerHttp.open(ExecutionContext())
             }
 
             When("read") {
-                actual = reader.read()
+                actual = readerHttp.read()
             }
 
             Then("journal is requested") {
@@ -93,12 +93,12 @@ object JournalItemReaderTest : Spek({
                             )
                     )
                 }
-                reader.open(ExecutionContext())
+                readerHttp.open(ExecutionContext())
             }
 
             When("read all") {
                 while (true) {
-                    reader.read() ?: break
+                    readerHttp.read() ?: break
                     actual++
                 }
             }

@@ -16,7 +16,7 @@ import java.net.URI
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
-class CommitteeReportItemReader(
+class HttpCommitteeReportItemReader(
     private val url: URI,
     private val congress: Congress
 ) : AbstractItemCountingItemStreamItemReader<CommitteeReport>() {
@@ -33,7 +33,7 @@ class CommitteeReportItemReader(
     }
 
     init {
-        setName(ClassUtils.getShortName(CommitteeReportItemReader::class.java))
+        setName(ClassUtils.getShortName(HttpCommitteeReportItemReader::class.java))
         baseUrl = url.toHttpUrlOrNull() ?: throw IllegalArgumentException("Not a valid url: $url")
     }
 

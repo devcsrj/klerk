@@ -17,18 +17,18 @@ import java.util.concurrent.TimeUnit
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 
-object JournalItemReaderTest : Spek({
+object HttpJournalItemReaderTest : Spek({
 
     val baseDir = "/senate/journal"
     val congress = Congress(17)
 
     Feature("Item Reader") {
         lateinit var server: MockWebServer
-        lateinit var reader: JournalItemReader
+        lateinit var readerHttp: HttpJournalItemReader
 
         beforeGroup {
             server = MockWebServer()
-            reader = JournalItemReader(server.url("/").toUri(), congress)
+            readerHttp = HttpJournalItemReader(server.url("/").toUri(), congress)
         }
 
         afterGroup {
@@ -44,11 +44,11 @@ object JournalItemReaderTest : Spek({
                 server.enqueue(200, "$baseDir/17th-regular_session1-p2.html")
                 server.enqueue(200, "$baseDir/17th-regular_session1-p1.html")
                 server.enqueue(200, "$baseDir/17th-regular_session1-journal1.html")
-                reader.open(ExecutionContext())
+                readerHttp.open(ExecutionContext())
             }
 
             When("read") {
-                actual = reader.read()
+                actual = readerHttp.read()
             }
 
             Then("journals are fetched") {
@@ -99,11 +99,11 @@ object JournalItemReaderTest : Spek({
 
                 val ctx = ExecutionContext()
                 ctx.putInt("journalNumber", 22)
-                reader.open(ctx)
+                readerHttp.open(ctx)
             }
 
             When("read") {
-                actual = reader.read()
+                actual = readerHttp.read()
             }
 
             Then("previous pages are requested") {
@@ -157,11 +157,11 @@ object JournalItemReaderTest : Spek({
                 val ctx = ExecutionContext()
                 ctx.put("session", Session.regular(1))
                 ctx.putInt("journalNumber", 89)
-                reader.open(ctx)
+                readerHttp.open(ctx)
             }
 
             When("read") {
-                actual = reader.read()
+                actual = readerHttp.read()
             }
 
             Then("selected regular session is changed") {

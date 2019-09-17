@@ -12,18 +12,18 @@ import java.util.concurrent.TimeUnit
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
 
-object CommitteeReportItemReaderTest : Spek({
+object HttpCommitteeReportItemReaderTest : Spek({
 
     val baseDir = "/senate/cr"
     val congress = Congress(17)
 
     Feature("Item reader") {
         lateinit var server: MockWebServer
-        lateinit var reader: CommitteeReportItemReader
+        lateinit var readerHttp: HttpCommitteeReportItemReader
 
         beforeGroup {
             server = MockWebServer()
-            reader = CommitteeReportItemReader(server.url("/").toUri(), congress)
+            readerHttp = HttpCommitteeReportItemReader(server.url("/").toUri(), congress)
         }
 
         afterGroup {
@@ -45,11 +45,11 @@ object CommitteeReportItemReaderTest : Spek({
                                 .readText()
                         )
                 )
-                reader.setCurrentItemCount(40)
+                readerHttp.setCurrentItemCount(40)
             }
 
             When("read") {
-                actual = reader.read()
+                actual = readerHttp.read()
             }
 
             Then("report is requested") {
@@ -88,11 +88,11 @@ object CommitteeReportItemReaderTest : Spek({
                                 .readText()
                         )
                 )
-                reader.setCurrentItemCount(998)
+                readerHttp.setCurrentItemCount(998)
             }
 
             When("read") {
-                actual = reader.read()
+                actual = readerHttp.read()
             }
 
             Then("it should return null") {

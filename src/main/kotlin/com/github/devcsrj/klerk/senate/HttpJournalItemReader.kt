@@ -18,7 +18,7 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.regex.Pattern
 
-class JournalItemReader(
+class HttpJournalItemReader(
     private val url: URI,
     private val congress: Congress
 ) : AbstractItemStreamItemReader<Journal>() {
@@ -67,7 +67,7 @@ class JournalItemReader(
     }
 
     init {
-        setName(ClassUtils.getShortName(JournalItemReader::class.java))
+        setName(ClassUtils.getShortName(HttpJournalItemReader::class.java))
         baseUrl = url.toHttpUrlOrNull() ?: throw IllegalArgumentException("Not a valid url: $url")
 
         // The site is built with ASP.NET, and relies on cookie to determine page state
