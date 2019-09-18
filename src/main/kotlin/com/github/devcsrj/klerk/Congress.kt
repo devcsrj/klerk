@@ -1,6 +1,11 @@
 package com.github.devcsrj.klerk
 
-
+/**
+ * Congress the national legislature of the Philippines.
+ *
+ * It is a bicameral body consisting of the Senate (upper chamber),
+ * and the House of Representatives (lower chamber)
+ */
 data class Congress(val number: Int) {
 
     init {
