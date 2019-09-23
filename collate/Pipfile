@@ -4,8 +4,11 @@ url = "https://pypi.org/simple"
 verify_ssl = true
 
 [dev-packages]
+httpretty = "==0.9.6"
 
 [packages]
+beautifulsoup4 = "==4.8.0"
+requests = "==2.22.0"
 
 [requires]
 python_version = "3.7"
