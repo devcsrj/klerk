@@ -43,12 +43,12 @@ class HouseJournalApi(JournalApi):
         if offset < 0:
             raise ValueError("Offset should at least be 0. Got: " + str(offset))
 
-        response = requests.get(self._base_uri + self._path, params={
+        with requests.get(self._base_uri + self._path, params={
             "v": "journals",
             "congress": congress.number,
             "session": session.number
-        })
-        document = BeautifulSoup(response.text, features="html.parser")
+        }) as response:
+            document = BeautifulSoup(response.text, features="html.parser")
         trs = document.select("table > tbody > tr")
         for tr in reversed(trs):
             journal = self._read_journal(congress, session, tr)
@@ -122,13 +122,13 @@ class SenateJournalApi(JournalApi):
         url = self._base_uri + self._path \
               + "?type=journal" \
               + "&congress=" + str(congress.number)
-        rp = rs.get(url)
-        document = BeautifulSoup(rp.text, features="html.parser")
+        with rs.get(url) as rp:
+            document = BeautifulSoup(rp.text, features="html.parser")
 
         bill_type = str(session.number) + session.type[0].upper()
 
         # Then we extract the required state variables
-        rp = rs.post(url, data={
+        with rs.post(url, data={
             "__EVENTTARGET": "dlBillType",
             "__EVENTARGUMENT": "",
             "__VIEWSTATE": document.select_one("#__VIEWSTATE").get("value"),
@@ -137,7 +137,8 @@ class SenateJournalApi(JournalApi):
             "__EVENTVALIDATION":
                 document.select_one("#__EVENTVALIDATION").get("value"),
             "dlBillType": bill_type
-        })
+        }) as rp:
+            pass
 
         return rs
 
@@ -151,8 +152,8 @@ class SenateJournalApi(JournalApi):
               + "?type=journal" \
               + "&congress=" + str(congress.number) \
               + "&p=" + str(page)
-        rp = rs.get(url)
-        document = BeautifulSoup(rp.text, features="html.parser")
+        with rs.get(url) as rp:
+            document = BeautifulSoup(rp.text, features="html.parser")
         return self._read_journals_from_document(
             rs, congress, session, document)
 
@@ -193,8 +194,9 @@ class SenateJournalApi(JournalApi):
                       congress: Congress,
                       session: Session,
                       url: str) -> Journal:
-        rp = requests.get(url)
-        document = BeautifulSoup(rp.text, features="html.parser")
+
+        with requests.get(url) as rp:
+            document = BeautifulSoup(rp.text, features="html.parser")
 
         p = document.select_one("#content > div.lis_doctitle > p")
         number = p.text[len("Journal No. "):].strip()
