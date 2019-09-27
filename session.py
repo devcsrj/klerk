@@ -1,3 +1,7 @@
+from dataclasses import dataclass
+
+
+@dataclass
 class Session:
     """
     Convened by the Congress, as defined in the Constitution.
@@ -12,11 +16,8 @@ class Session:
     emergencies or urgent matters.
     """
 
-    def __init__(self,
-                 number: int,
-                 type: str):
-        self.number = number
-        self.type = type
+    number: int
+    type: str
 
     def __str__(self):
         return "{} session {}".format(self.type, self.number)
