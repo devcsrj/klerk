@@ -138,6 +138,9 @@ class SenateJournalApi(JournalApi):
                 document.select_one("#__EVENTVALIDATION").get("value"),
             "dlBillType": bill_type
         })
+        if rp.status_code != 302:
+            raise RuntimeError(
+                "Expecting a redirect, but got: " + rp.status_code)
 
         return rs
 
@@ -186,7 +189,7 @@ class SenateJournalApi(JournalApi):
                                   links: Tag) -> Iterator[Journal]:
         for link in reversed(links):
             href = link.get("href")
-            path = self._base_uri + "/lis/" + href
+            path = self._base_uri + "/lis" + href
             yield self._read_journal(congress, session, path)
 
     def _read_journal(self,
@@ -202,7 +205,7 @@ class SenateJournalApi(JournalApi):
         href = document.select_one("#lis_download > ul > li > a").get("href")
         uri = self._base_uri + href
 
-        content = document.select_one("#content").text
+        content = document.select_one("#content").text()
         matcher = re.search(".*Date: (("
                             "January"
                             "|February"
@@ -215,9 +218,9 @@ class SenateJournalApi(JournalApi):
                             "|September"
                             "|October"
                             "|November"
-                            "|December) \\d{1,2}, \\d{4})", content)
+                            "|December) \\d{1,2}, \\d{4})", content.text)
         date_text = matcher.group(1)
-        date = datetime.datetime.strptime(date_text, "%B %d, %Y").date()
+        date = datetime.datetime.strptime(date_text, "%m %d, %Y").date()
 
         return Journal(
             chamber=Chamber.SENATE,
