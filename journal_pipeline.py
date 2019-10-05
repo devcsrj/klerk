@@ -81,9 +81,6 @@ class DoWriteJournalFn(beam.DoFn):
         journal: Journal = element
         name = "journal-{}.json".format(journal.number)
         file = _journal_dir(journal, self._output_dir) / name
-        if file.is_file():
-            return [element]  # skip
-
         file.parent.mkdir(parents=True, exist_ok=True)
 
         with file.open("w") as f:
@@ -106,9 +103,6 @@ class DoDownloadJournalFn(beam.DoFn):
         journal: Journal = element
         name = "journal-{}.pdf".format(journal.number)
         file = _journal_dir(journal, self._output_dir) / name
-        if file.is_file():
-            return [element]  # skip
-
         file.parent.mkdir(parents=True, exist_ok=True)
 
         response = requests.get(journal.document_uri, stream=True)
