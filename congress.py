@@ -1,7 +1,3 @@
-from dataclasses import dataclass
-
-
-@dataclass
 class Congress:
     """
     The national legislature of the Philippines.
