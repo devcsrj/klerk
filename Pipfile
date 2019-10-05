@@ -18,4 +18,4 @@ tqdm = "==4.36.1"
 python_version = "3.7"
 
 [scripts]
-journal = "python journal_download.py --congress 17 --output dist"
+journal = "python journal_pipeline.py --congress 17 --output dist"
