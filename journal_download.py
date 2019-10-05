@@ -17,9 +17,8 @@ from session import Session
 
 def _journal_dir(journal: Journal, base_dir: Path) -> Path:
     congress = str(journal.congress.number)
-    chamber = journal.chamber.name
     session = journal.session.type + "-" + str(journal.session.number)
-    return base_dir / congress / chamber / session
+    return base_dir / congress / session
 
 
 class DoPrintJournalFn(beam.DoFn):
@@ -62,7 +61,7 @@ class DoFetchJournalFn(beam.DoFn):
         for session in sessions:
             jh = self.house_api.fetch(congress, session)
             js = self.senate_api.fetch(congress, session)
-            items = chain(items, jh, js)
+            items = chain(items, js, jh)
 
         return items
 
