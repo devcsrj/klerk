@@ -63,6 +63,8 @@ class SenateHttpJournalApi(private val url: URI) : JournalApi {
             )
     }
 
+    constructor() : this(URI.create("http://www.senate.gov.ph"))
+
     init {
         // The site is built with ASP.NET, and relies on cookie to determine page state
         val cookieManager = CookieManager()
@@ -107,8 +109,8 @@ class SenateHttpJournalApi(private val url: URI) : JournalApi {
             .url(url)
             .post(formBody)
             .build()
-        client.newCall(request).execute().use { response ->
-            check(response.code == 302) { "Expecting a redirect, but got: ${response.code}" }
+        client.newCall(request).execute().use {
+
         }
     }
 
@@ -189,8 +191,8 @@ class SenateHttpJournalApi(private val url: URI) : JournalApi {
 
         return client.newCall(request).execute().use { response ->
             response.body.use { body ->
-                val reader = body!!.byteStream().bufferedReader()
-                parser.parseInput(reader, baseUrl.toString())
+                val content = body!!.string()
+                parser.parseInput(content, baseUrl.toString())
             }
         }
     }

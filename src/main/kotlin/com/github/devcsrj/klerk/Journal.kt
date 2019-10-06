@@ -17,6 +17,7 @@
  */
 package com.github.devcsrj.klerk
 
+import java.io.Serializable
 import java.net.URI
 import java.time.LocalDate
 
@@ -27,4 +28,9 @@ data class Journal(
     val number: Int,
     val date: LocalDate,
     val documentUri: URI
-)
+) : Serializable {
+
+    override fun toString(): String {
+        return "($congress | $session) Journal $number - $date"
+    }
+}

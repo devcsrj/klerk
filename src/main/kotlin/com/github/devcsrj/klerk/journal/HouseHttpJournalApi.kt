@@ -42,6 +42,8 @@ class HouseHttpJournalApi(private val url: URI) : JournalApi {
         private val DATE_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd")
     }
 
+    constructor() : this(URI.create("http://www.congress.gov.ph"))
+
     override fun fetch(congress: Congress, session: Session, offset: Int): Iterator<Journal> {
         return readJournals(congress, session, offset).iterator()
     }

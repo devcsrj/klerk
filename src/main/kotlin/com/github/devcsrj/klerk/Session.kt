@@ -17,10 +17,16 @@
  */
 package com.github.devcsrj.klerk
 
+import java.io.Serializable
+
 data class Session(
     val number: Int,
     val type: Type
-) {
+) : Serializable {
+
+    override fun toString(): String {
+        return "$type Session $number"
+    }
 
     companion object {
 

@@ -17,13 +17,15 @@
  */
 package com.github.devcsrj.klerk
 
+import java.io.Serializable
+
 /**
  * Congress the national legislature of the Philippines.
  *
  * It is a bicameral body consisting of the Senate (upper chamber),
  * and the House of Representatives (lower chamber)
  */
-data class Congress(val number: Int) {
+data class Congress(val number: Int) : Serializable {
 
     init {
         require(number > 0) { "Number must be > 0" }
