@@ -26,9 +26,8 @@ import org.apache.beam.sdk.transforms.Create
 import org.apache.beam.sdk.transforms.DoFn
 import org.apache.beam.sdk.transforms.ParDo
 import org.apache.pdfbox.pdmodel.PDDocument
-import org.apache.pdfbox.text.PDFTextStripperByArea
+import org.apache.pdfbox.text.PDFTextStripper
 import org.slf4j.LoggerFactory
-import java.awt.Rectangle
 import java.io.File
 
 
@@ -55,16 +54,9 @@ class ExtractingPipeline {
             val output = file.parentFile.resolve(txt)
             PDDocument.load(file).use { pdf ->
                 output.bufferedWriter().use { writer ->
-                    // This dimension skips the text in the borders
-                    val rectangle = Rectangle(21, 77, 550, 727)
-
-                    val stripper = PDFTextStripperByArea()
-                    stripper.addRegion("content", rectangle)
-                    for (page in pdf.pages) {
-                        stripper.extractRegions(page)
-                        val text = stripper.getTextForRegion("content")
-                        writer.write(text)
-                    }
+                    val stripper = PDFTextStripper()
+                    stripper.startPage = 2
+                    stripper.writeText(pdf, writer)
                 }
             }
             outputReceiver.output(output)
