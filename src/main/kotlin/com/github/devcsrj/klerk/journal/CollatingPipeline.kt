@@ -40,17 +40,6 @@ class CollatingPipeline {
 
         private val logger = LoggerFactory.getLogger(CollatingPipeline::class.java)
 
-        private fun directoryFor(baseDir: File, journal: Journal): File {
-            val congress = journal.congress.number.toString()
-            val session = journal.session.let {
-                "${it.type.name.toLowerCase()}-${it.number}"
-            }
-            val chamber = journal.chamber.name
-            return baseDir
-                .resolve(congress)
-                .resolve(chamber)
-                .resolve(session)
-        }
     }
 
     /**

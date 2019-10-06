@@ -44,6 +44,7 @@ dependencies {
     implementation("org.jsoup:jsoup:1.12.1")
     implementation("com.squareup.okhttp3:okhttp:${okhttpVersion}")
     implementation("com.squareup.okhttp3:okhttp-urlconnection:${okhttpVersion}")
+    implementation("org.apache.pdfbox:pdfbox:2.0.17")
     implementation("org.apache.beam:beam-sdks-java-core:${beamVersion}")
     implementation("org.apache.beam:beam-runners-direct-java:${beamVersion}")
 
@@ -90,8 +91,17 @@ license {
 
 tasks.register("collateJournals", JavaExec) {
     group = "Pipeline"
-    description = "Pipelines actions for Klerk"
+    description = "Fetches and downloads all journals"
 
     main = "com.github.devcsrj.klerk.journal.CollatingPipelineKt"
     classpath = sourceSets.main.runtimeClasspath
 }
+
+tasks.register("extractJournals", JavaExec) {
+    group = "Pipeline"
+    description = "Extracts and processes text from journals"
+
+    main = "com.github.devcsrj.klerk.journal.ExtractingPipelineKt"
+    classpath = sourceSets.main.runtimeClasspath
+}
+
