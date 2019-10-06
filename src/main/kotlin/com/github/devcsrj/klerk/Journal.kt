@@ -31,6 +31,6 @@ data class Journal(
 ) : Serializable {
 
     override fun toString(): String {
-        return "($congress | $session) Journal $number - $date"
+        return "($congress | $session) $chamber Journal $number - $date"
     }
 }

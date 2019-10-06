@@ -88,8 +88,10 @@ license {
     ])
 }
 
-tasks.register("journalPipeline", JavaExec) {
+tasks.register("collateJournals", JavaExec) {
     group = "Pipeline"
+    description = "Pipelines actions for Klerk"
+
     main = "com.github.devcsrj.klerk.journal.JournalPipelineKt"
     classpath = sourceSets.main.runtimeClasspath
 }

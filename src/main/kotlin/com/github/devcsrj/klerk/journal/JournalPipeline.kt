@@ -20,6 +20,7 @@ package com.github.devcsrj.klerk.journal
 import com.github.devcsrj.klerk.Congress
 import com.github.devcsrj.klerk.Journal
 import com.github.devcsrj.klerk.Session
+import com.github.devcsrj.klerk.downloadTo
 import org.apache.beam.sdk.Pipeline
 import org.apache.beam.sdk.options.Description
 import org.apache.beam.sdk.options.PipelineOptions
@@ -29,7 +30,8 @@ import org.apache.beam.sdk.transforms.Create
 import org.apache.beam.sdk.transforms.DoFn
 import org.apache.beam.sdk.transforms.ParDo
 import org.slf4j.LoggerFactory
-import java.nio.file.Path
+import java.io.File
+import java.time.format.DateTimeFormatter
 
 
 class JournalPipeline {
@@ -37,6 +39,18 @@ class JournalPipeline {
     companion object {
 
         private val logger = LoggerFactory.getLogger(JournalPipeline::class.java)
+
+        private fun directoryFor(baseDir: File, journal: Journal): File {
+            val congress = journal.congress.number.toString()
+            val session = journal.session.let {
+                "${it.type.name.toLowerCase()}-${it.number}"
+            }
+            val chamber = journal.chamber.name
+            return baseDir
+                .resolve(congress)
+                .resolve(chamber)
+                .resolve(session)
+        }
     }
 
     /**
@@ -62,16 +76,86 @@ class JournalPipeline {
             for (session in sessions) {
                 val hs = houseApi.fetch(congress, session)
                 for (journal in hs) {
-                    logger.info("✒️ $journal")
+                    logger.info("📄️ $journal")
                     outputReceiver.output(journal)
                 }
 
                 val ss = senateApi.fetch(congress, session)
                 for (journal in ss) {
-                    logger.info("✒️ $journal")
+                    logger.info("📄️ $journal")
                     outputReceiver.output(journal)
                 }
             }
+        }
+    }
+
+    /**
+     * Writes the journal metadata to a local directory
+     */
+    class Write(private val dist: File) : DoFn<Journal, Journal>() {
+
+        init {
+            require(dist.isDirectory) {
+                "Expecting a directory, but got $dist"
+            }
+        }
+
+        @ProcessElement
+        fun processElement(
+            @Element journal: Journal,
+            outputReceiver: OutputReceiver<Journal>
+        ) {
+
+            val format = DateTimeFormatter.ofPattern("YYYY-MM-dd")
+            val dir = directoryFor(dist, journal)
+            val json = dir.resolve("journal-${journal.number}.json")
+            if (!json.exists()) {
+                json.writeText(
+                    """
+                {
+                    "congress": ${journal.congress.number},
+                    "chamber": "${journal.chamber}",
+                    "session": {
+                        "number": ${journal.session.number},
+                        "type": "${journal.session.type}"
+                    },
+                    "number": ${journal.number},
+                    "date": "${format.format(journal.date)}",
+                    "document_uri": "${journal.documentUri}"
+                }
+                """.trimIndent()
+                )
+            }
+
+            outputReceiver.output(journal)
+        }
+    }
+
+    /**
+     * Downloads [Journal.documentUri] to the local directory
+     */
+    class Download(private val dist: File) : DoFn<Journal, Journal>() {
+
+        init {
+            require(dist.isDirectory) {
+                "Expecting a directory, but got $dist"
+            }
+        }
+
+        @ProcessElement
+        fun processElement(
+            @Element journal: Journal,
+            outputReceiver: OutputReceiver<Journal>
+        ) {
+
+            val dir = directoryFor(dist, journal)
+            val pdf = dir.resolve("journal-${journal.number}.pdf")
+            logger.info("⬇ Journal ${journal.number} - ${journal.documentUri}")
+            if (!pdf.exists()) {
+                journal.documentUri.toURL().downloadTo(pdf.toPath())
+            }
+
+            outputReceiver.output(journal)
         }
     }
 
@@ -84,9 +168,9 @@ class JournalPipeline {
         fun setInput(input: List<Int>)
 
         @Description("The destination directory to write the files to")
-        fun getOutput(): Path
+        fun getOutput(): String
 
-        fun setOutput(output: Path)
+        fun setOutput(output: String)
     }
 }
 
@@ -95,6 +179,10 @@ fun main(args: Array<String>) {
         .fromArgs(*args)
         .withValidation()
         .`as`(JournalPipeline.Options::class.java)
+
+    val dist = File(options.getOutput())
+    dist.mkdirs()
+
     val congresses = Create.of(options.getInput()
         .map { Congress(it) }
         .toList())
@@ -104,6 +192,8 @@ fun main(args: Array<String>) {
     pipeline
         .apply("Prepare", congresses)
         .apply("Fetch", ParDo.of(JournalPipeline.Fetch()))
+        .apply("Write", ParDo.of(JournalPipeline.Write(dist)))
+        .apply("Download", ParDo.of(JournalPipeline.Download(dist)))
 
     pipeline.run().waitUntilFinish()
 }
