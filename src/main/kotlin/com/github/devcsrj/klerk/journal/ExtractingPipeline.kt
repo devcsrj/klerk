@@ -56,15 +56,14 @@ class ExtractingPipeline {
             PDDocument.load(file).use { pdf ->
                 output.bufferedWriter().use { writer ->
                     // This dimension skips the text in the borders
+                    val rectangle = Rectangle(21, 77, 550, 727)
+
                     val stripper = PDFTextStripperByArea()
-                    stripper.addRegion("left", Rectangle(21, 77, 275, 740))
-                    stripper.addRegion("right", Rectangle(296, 77, 275, 740))
-                    val numPages = pdf.numberOfPages - 1
-                    for (i in 2..numPages) {
-                        val page = pdf.getPage(i)
+                    stripper.addRegion("content", rectangle)
+                    for (page in pdf.pages) {
                         stripper.extractRegions(page)
-                        writer.write(stripper.getTextForRegion("left"))
-                        writer.write(stripper.getTextForRegion("right"))
+                        val text = stripper.getTextForRegion("content")
+                        writer.write(text)
                     }
                 }
             }
