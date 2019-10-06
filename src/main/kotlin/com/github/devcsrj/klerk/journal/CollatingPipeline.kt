@@ -95,7 +95,7 @@ class CollatingPipeline {
             outputReceiver: OutputReceiver<Journal>
         ) {
 
-            val format = DateTimeFormatter.ofPattern("YYYY-MM-dd")
+            val format = DateTimeFormatter.ofPattern("yyyy-MM-dd")
             val dir = directoryFor(dist, journal)
             val json = dir.resolve("journal-${journal.number}.json")
             if (!json.exists()) {
