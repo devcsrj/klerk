@@ -92,6 +92,6 @@ tasks.register("collateJournals", JavaExec) {
     group = "Pipeline"
     description = "Pipelines actions for Klerk"
 
-    main = "com.github.devcsrj.klerk.journal.JournalPipelineKt"
+    main = "com.github.devcsrj.klerk.journal.CollatingPipelineKt"
     classpath = sourceSets.main.runtimeClasspath
 }

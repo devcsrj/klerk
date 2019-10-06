@@ -34,11 +34,11 @@ import java.io.File
 import java.time.format.DateTimeFormatter
 
 
-class JournalPipeline {
+class CollatingPipeline {
 
     companion object {
 
-        private val logger = LoggerFactory.getLogger(JournalPipeline::class.java)
+        private val logger = LoggerFactory.getLogger(CollatingPipeline::class.java)
 
         private fun directoryFor(baseDir: File, journal: Journal): File {
             val congress = journal.congress.number.toString()
@@ -178,7 +178,7 @@ fun main(args: Array<String>) {
     val options = PipelineOptionsFactory
         .fromArgs(*args)
         .withValidation()
-        .`as`(JournalPipeline.Options::class.java)
+        .`as`(CollatingPipeline.Options::class.java)
 
     val dist = File(options.getOutput())
     dist.mkdirs()
@@ -191,9 +191,9 @@ fun main(args: Array<String>) {
 
     pipeline
         .apply("Prepare", congresses)
-        .apply("Fetch", ParDo.of(JournalPipeline.Fetch()))
-        .apply("Write", ParDo.of(JournalPipeline.Write(dist)))
-        .apply("Download", ParDo.of(JournalPipeline.Download(dist)))
+        .apply("Fetch", ParDo.of(CollatingPipeline.Fetch()))
+        .apply("Write", ParDo.of(CollatingPipeline.Write(dist)))
+        .apply("Download", ParDo.of(CollatingPipeline.Download(dist)))
 
     pipeline.run().waitUntilFinish()
 }
