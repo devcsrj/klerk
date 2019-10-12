@@ -47,6 +47,9 @@ dependencies {
     implementation("org.apache.pdfbox:pdfbox:2.0.17")
     implementation("org.apache.beam:beam-sdks-java-core:${beamVersion}")
     implementation("org.apache.beam:beam-runners-direct-java:${beamVersion}")
+    implementation("org.bytedeco:javacv-platform:1.5.1")
+    implementation("org.bytedeco.javacpp-presets:tesseract:4.0.0-1.4.4")
+    implementation("org.bytedeco.javacpp-presets:leptonica:1.77.0-1.4.4")
 
     runtimeOnly("org.slf4j:slf4j-simple:${slf4jVersion}")
 
@@ -93,7 +96,7 @@ tasks.register("collateJournals", JavaExec) {
     group = "Pipeline"
     description = "Fetches and downloads all journals"
 
-    main = "com.github.devcsrj.klerk.journal.CollatingPipelineKt"
+    main = "com.github.devcsrj.klerk.journal.collate.PipelineKt"
     classpath = sourceSets.main.runtimeClasspath
 }
 
@@ -101,7 +104,7 @@ tasks.register("extractJournals", JavaExec) {
     group = "Pipeline"
     description = "Extracts and processes text from journals"
 
-    main = "com.github.devcsrj.klerk.journal.ExtractingPipelineKt"
+    main = "com.github.devcsrj.klerk.journal.extract.PipelineKt"
     classpath = sourceSets.main.runtimeClasspath
 }
 

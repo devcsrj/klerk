@@ -62,7 +62,7 @@ class HouseHttpJournalApi(private val url: URI) : JournalApi {
         val document = client.newCall(request).execute().use { response ->
             response.body.use { body ->
                 val reader = body!!.byteStream().bufferedReader()
-                parser.parseInput(reader, url.toString())
+                parser.parseInput(reader.readText(), url.toString())
             }
         }
         val trs = document.body().select("table > tbody > tr")
