@@ -39,8 +39,7 @@ fun main(args: Array<String>) {
 
     pipeline
         .apply("List", Create.of(src))
-        .apply("Extract", ParDo.of(PdfToTxt()))
-        .apply("Strip", ParDo.of(StripBorderText()))
+        .apply("ToImage", ParDo.of(PdfToImage()))
 
     pipeline.run().waitUntilFinish()
 }

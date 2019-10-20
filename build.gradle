@@ -13,6 +13,7 @@ ext {
     beamVersion = "2.15.0"
     junit5Version = "5.5.1"
     okhttpVersion = "4.2.0"
+    pdfboxVersion = "2.0.17"
     slf4jVersion = "1.7.28"
     spekVersion = "2.0.6"
 }
@@ -44,7 +45,9 @@ dependencies {
     implementation("org.jsoup:jsoup:1.12.1")
     implementation("com.squareup.okhttp3:okhttp:${okhttpVersion}")
     implementation("com.squareup.okhttp3:okhttp-urlconnection:${okhttpVersion}")
-    implementation("org.apache.pdfbox:pdfbox:2.0.17")
+    implementation("org.apache.pdfbox:pdfbox:${pdfboxVersion}")
+    implementation("org.apache.pdfbox:pdfbox-tools:${pdfboxVersion}")
+    implementation("org.apache.pdfbox:jbig2-imageio:3.0.2")
     implementation("org.apache.beam:beam-sdks-java-core:${beamVersion}")
     implementation("org.apache.beam:beam-runners-direct-java:${beamVersion}")
     implementation("org.bytedeco:javacv-platform:1.5.1")
