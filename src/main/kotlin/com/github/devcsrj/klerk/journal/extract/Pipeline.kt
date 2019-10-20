@@ -40,6 +40,7 @@ fun main(args: Array<String>) {
     pipeline
         .apply("List", Create.of(src))
         .apply("ToImage", ParDo.of(PdfToImage()))
+        .apply("Crop", ParDo.of(CropContent()))
 
     pipeline.run().waitUntilFinish()
 }
