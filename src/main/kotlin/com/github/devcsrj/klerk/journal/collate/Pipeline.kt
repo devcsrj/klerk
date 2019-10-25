@@ -16,10 +16,14 @@
 package com.github.devcsrj.klerk.journal.collate
 
 import com.github.devcsrj.klerk.Congress
+import com.github.devcsrj.klerk.Journal
 import org.apache.beam.sdk.Pipeline
 import org.apache.beam.sdk.options.PipelineOptionsFactory
 import org.apache.beam.sdk.transforms.Create
 import org.apache.beam.sdk.transforms.ParDo
+import org.apache.beam.sdk.transforms.windowing.FixedWindows
+import org.apache.beam.sdk.transforms.windowing.Window
+import org.joda.time.Duration
 import java.io.File
 
 fun main(args: Array<String>) {
@@ -40,6 +44,7 @@ fun main(args: Array<String>) {
     pipeline
         .apply("Prepare", congresses)
         .apply("Fetch", ParDo.of(Fetch()))
+        .apply(Window.into<Journal>(FixedWindows.of(Duration.standardDays(5))))
         .apply("Write", ParDo.of(Write(dist)))
         .apply("Download", ParDo.of(Download(dist)))
 

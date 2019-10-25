@@ -22,7 +22,10 @@ import com.github.devcsrj.klerk.journal.HouseHttpJournalApi
 import com.github.devcsrj.klerk.journal.JournalApi
 import com.github.devcsrj.klerk.journal.SenateHttpJournalApi
 import org.apache.beam.sdk.transforms.DoFn
+import org.joda.time.Instant
 import org.slf4j.LoggerFactory
+import java.time.LocalDate
+import java.util.*
 
 /**
  * Retrieves all [Session]s from each Congress of both the house and the senate
@@ -52,14 +55,26 @@ internal class Fetch : DoFn<Congress, Journal>() {
             val hs = houseApi.fetch(congress, session)
             for (journal in hs) {
                 logger.info("📄️ $journal")
-                outputReceiver.output(journal)
+                val timestamp = instantOf(journal.date)
+                outputReceiver.outputWithTimestamp(journal, timestamp)
             }
 
             val ss = senateApi.fetch(congress, session)
             for (journal in ss) {
                 logger.info("📄️ $journal")
-                outputReceiver.output(journal)
+                val timestamp = instantOf(journal.date)
+                outputReceiver.outputWithTimestamp(journal, timestamp)
             }
+        }
+    }
+
+    private fun instantOf(localDate: LocalDate): Instant {
+        return localDate.let {
+            val d = Date(it.toEpochDay())
+            org.joda.time.LocalDate
+                .fromDateFields(d)
+                .toDateTimeAtStartOfDay()
+                .toInstant()
         }
     }
 }
