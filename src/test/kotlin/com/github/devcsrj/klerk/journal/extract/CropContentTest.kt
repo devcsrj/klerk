@@ -22,24 +22,26 @@ import org.apache.beam.sdk.testing.TestPipeline
 import org.apache.beam.sdk.transforms.Create
 import org.apache.beam.sdk.transforms.ParDo
 import org.spekframework.spek2.Spek
-import org.spekframework.spek2.style.gherkin.Feature
 import java.awt.Dimension
-import java.io.File
 import java.nio.file.Files
 import kotlin.test.assertEquals
 
 object CropContentTest : Spek({
 
-    Feature("crop house journal") {
+    group("bordered images") {
+        /**
+         * Path => expected cropped dimension
+         */
+        val resources: Map<String, Dimension> = mapOf(
+            "17th-h-r2-j28-p2.png" to Dimension(2192, 3180),
+            "17th-s-r1-j72-p2.png" to Dimension(2241, 3119),
+            "17th-s-r1-j72-p1.png" to Dimension(2251, 3111)
+        )
 
-        Scenario("page has border") {
-
-            val png = "/journal/crop/17th-h-r2-j28-p2.png"
-            lateinit var original: File
-            lateinit var cropped: File
-
-            Given("17th-h-r2-j28-p2") {
-                original = Files.createTempFile("", ".png").toFile()
+        resources.forEach { (resource, expected) ->
+            test("Crop $resource") {
+                val png = "/journal/crop/$resource"
+                val original = Files.createTempFile("", ".png").toFile()
                 original.outputStream().use { sink ->
                     javaClass.getResourceAsStream(png).use { src ->
                         src.copyTo(sink)
@@ -48,11 +50,9 @@ object CropContentTest : Spek({
                 original.deleteOnExit()
 
                 val filename = "${original.nameWithoutExtension}-cropped.png"
-                cropped = original.parentFile.resolve(filename)
+                val cropped = original.parentFile.resolve(filename)
                 cropped.deleteOnExit()
-            }
 
-            When("processed", timeout = 60 * 1000) {
                 val pipeline = TestPipeline.create()
                     .enableAbandonedNodeEnforcement(false)
                 val input = pipeline.apply(Create.of(original))
@@ -63,160 +63,38 @@ object CropContentTest : Spek({
                     .containsInAnyOrder(cropped)
 
                 pipeline.run()
-            }
 
-            Then("content is cropped") {
-                val expected = Dimension(2192, 3180)
                 val actual = Images.dimensionOf(cropped)
                 assertEquals(expected, actual)
-            }
-        }
-
-        Scenario("page has no border") {
-
-            val png = "/journal/crop/17th-h-r2-j28-p1.png"
-            lateinit var original: File
-
-            Given("17th-h-r2-j28-p1") {
-                original = Files.createTempFile("", ".png").toFile()
-                original.outputStream().use { sink ->
-                    javaClass.getResourceAsStream(png).use { src ->
-                        src.copyTo(sink)
-                    }
-                }
-                original.deleteOnExit()
-            }
-
-            When("processed", timeout = 60 * 1000) {
-                val pipeline = TestPipeline.create()
-                    .enableAbandonedNodeEnforcement(false)
-                val input = pipeline.apply(Create.of(original))
-                val output = input.apply(ParDo.of(CropContent()))
-
-                PAssert
-                    .that(output)
-                    .containsInAnyOrder(original)
-                pipeline.run()
-            }
-
-            Then("nothing is cropped") {
-                // nothing
             }
         }
     }
 
-    Feature("crop senate journal") {
+    group("borderless images") {
+        val resources: List<String> = listOf(
+            "17th-h-r2-j28-p1.png",
+            "17th-s-r1-j72-p0.png"
+        )
 
-        Scenario("page has border") {
-
-            val png = "/journal/crop/17th-s-r1-j72-p2.png"
-            lateinit var original: File
-            lateinit var cropped: File
-
-            Given("17th-s-r1-j72-p2.png") {
-                original = Files.createTempFile("", ".png").toFile()
-                original.outputStream().use { sink ->
-                    javaClass.getResourceAsStream(png).use { src ->
-                        src.copyTo(sink)
-                    }
+        resources.forEach { resource ->
+            val png = "/journal/crop/$resource"
+            val original = Files.createTempFile("", ".png").toFile()
+            original.outputStream().use { sink ->
+                javaClass.getResourceAsStream(png).use { src ->
+                    src.copyTo(sink)
                 }
-                original.deleteOnExit()
-
-                val filename = "${original.nameWithoutExtension}-cropped.png"
-                cropped = original.parentFile.resolve(filename)
-                cropped.deleteOnExit()
             }
+            original.deleteOnExit()
 
-            When("processed", timeout = 60 * 1000) {
-                val pipeline = TestPipeline.create()
-                    .enableAbandonedNodeEnforcement(false)
-                val input = pipeline.apply(Create.of(original))
-                val output = input.apply(ParDo.of(CropContent()))
+            val pipeline = TestPipeline.create()
+                .enableAbandonedNodeEnforcement(false)
+            val input = pipeline.apply(Create.of(original))
+            val output = input.apply(ParDo.of(CropContent()))
 
-                PAssert
-                    .that(output)
-                    .containsInAnyOrder(cropped)
-
-                pipeline.run()
-            }
-
-            Then("content is cropped") {
-                val expected = Dimension(2241, 3119)
-                val actual = Images.dimensionOf(cropped)
-                assertEquals(expected, actual)
-            }
-        }
-
-        Scenario("page has border and large whitespace") {
-
-            val png = "/journal/crop/17th-s-r1-j72-p1.png"
-            lateinit var original: File
-            lateinit var cropped: File
-
-            Given("17th-s-r1-j72-p1.png") {
-                original = Files.createTempFile("", ".png").toFile()
-                original.outputStream().use { sink ->
-                    javaClass.getResourceAsStream(png).use { src ->
-                        src.copyTo(sink)
-                    }
-                }
-                original.deleteOnExit()
-
-                val filename = "${original.nameWithoutExtension}-cropped.png"
-                cropped = original.parentFile.resolve(filename)
-                cropped.deleteOnExit()
-            }
-
-            When("processed", timeout = 60 * 1000) {
-                val pipeline = TestPipeline.create()
-                    .enableAbandonedNodeEnforcement(false)
-                val input = pipeline.apply(Create.of(original))
-                val output = input.apply(ParDo.of(CropContent()))
-
-                PAssert
-                    .that(output)
-                    .containsInAnyOrder(cropped)
-
-                pipeline.run()
-            }
-
-            Then("content is cropped") {
-                val expected = Dimension(2251, 3111)
-                val actual = Images.dimensionOf(cropped)
-                assertEquals(expected, actual)
-            }
-        }
-
-        Scenario("page has no border") {
-
-            val png = "/journal/crop/17th-s-r1-j72-p0.png"
-            lateinit var original: File
-
-            Given("17th-s-r1-j72-p0.png") {
-                original = Files.createTempFile("", ".png").toFile()
-                original.outputStream().use { sink ->
-                    javaClass.getResourceAsStream(png).use { src ->
-                        src.copyTo(sink)
-                    }
-                }
-                original.deleteOnExit()
-            }
-
-            When("processed", timeout = 60 * 1000) {
-                val pipeline = TestPipeline.create()
-                    .enableAbandonedNodeEnforcement(false)
-                val input = pipeline.apply(Create.of(original))
-                val output = input.apply(ParDo.of(CropContent()))
-
-                PAssert
-                    .that(output)
-                    .containsInAnyOrder(original)
-                pipeline.run()
-            }
-
-            Then("nothing is cropped") {
-                // nothing
-            }
+            PAssert
+                .that(output)
+                .containsInAnyOrder(original)
+            pipeline.run()
         }
     }
 })
