@@ -43,22 +43,22 @@ internal class DeskewContent : DoFn<File, File>() {
 
         val name = file.nameWithoutExtension
         val outputFile = file.parentFile.resolve("$name-deskewed.png")
-//        if (outputFile.exists()) {
-//            outputReceiver.output(file)
-//            return
-//        }
+        if (outputFile.exists()) {
+            outputReceiver.output(file)
+            return
+        }
 
         logger.info("📏 $file")
         val deskewed = imread(file.toString()).use { src ->
             invertImage(src).use { inverted ->
                 dilateContent(inverted).use { dilated ->
-                    //                    Mat().use { debug ->
-//                        src.copyTo(debug)
-//                        val name = file.nameWithoutExtension
-//                        val f = file.parentFile.resolve("$name-debug.png")
-//                        dilated.drawContoursOn(debug)
-//                        imwrite(f.toString(), debug)
-//                    }
+                    // Mat().use { debug ->
+                    //     src.copyTo(debug)
+                    //     val f = file.parentFile.resolve("$name-debug.png")
+                    //     dilated.drawContoursOn(debug)
+                    //     imwrite(f.toString(), debug)
+                    // }
+
                     deskew(src, dilated)
                 }
             }
