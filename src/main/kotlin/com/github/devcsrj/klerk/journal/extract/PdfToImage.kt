@@ -55,24 +55,27 @@ internal class PdfToImage : DoFn<File, File>() {
         }
     }
 
-    private fun renderPages(file: File): Sequence<File> {
+    private fun renderPages(file: File): Collection<File> {
         val prefix = file.nameWithoutExtension
         val dir = file.parentFile
-        val memory = MemoryUsageSetting.setupMixed(512)
-        return sequence {
-            PDDocument.load(file, memory).use { pdf ->
-                val renderer = PDFRenderer(pdf)
-                for (page in 0 until pdf.numberOfPages) {
-                    val png = dir.resolve("$prefix-p$page.png")
-                    if (!png.isFile) {
-                        val img = renderer.renderImageWithDPI(page, 300F, ImageType.GRAY)
-                        png.outputStream().use { sink ->
-                            ImageIOUtil.writeImage(img, "png", sink)
-                        }
+        val memory = MemoryUsageSetting.setupTempFileOnly()
+        val files = mutableListOf<File>()
+        PDDocument.load(file, memory).use { pdf ->
+            pdf.resourceCache = null // We're consuming too much memory
+
+            val renderer = PDFRenderer(pdf)
+            for (page in 0 until pdf.numberOfPages) {
+                val png = dir.resolve("$prefix-p$page.png")
+                if (!png.isFile) {
+                    val img = renderer.renderImageWithDPI(page, 144F, ImageType.GRAY)
+                    png.outputStream().use { sink ->
+                        ImageIOUtil.writeImage(img, "png", sink)
                     }
-                    yield(png)
+                    img.flush()
                 }
+                files.add(png)
             }
         }
+        return files
     }
 }

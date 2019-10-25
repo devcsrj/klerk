@@ -76,3 +76,16 @@ internal fun Mat.drawContoursOn(output: Mat) {
         )
     }
 }
+
+/**
+ * Creates a matrix that is a color inverted version
+ * of this matrix.
+ */
+internal fun Mat.invertColors(): Mat {
+    return Mat().use { grey ->
+        cvtColor(this, grey, COLOR_BGR2GRAY)
+        val dest = Mat()
+        threshold(grey, dest, 0.0, 255.0, THRESH_BINARY_INV + THRESH_OTSU)
+        dest
+    }
+}

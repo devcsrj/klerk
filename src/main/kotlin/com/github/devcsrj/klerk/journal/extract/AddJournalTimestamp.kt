@@ -15,39 +15,37 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.github.devcsrj.klerk.journal.collate
+package com.github.devcsrj.klerk.journal.extract
 
 import com.github.devcsrj.klerk.Journal
-import com.github.devcsrj.klerk.journal.asJson
-import com.github.devcsrj.klerk.journal.directoryFor
+import com.github.devcsrj.klerk.journal.fromJson
 import org.apache.beam.sdk.transforms.DoFn
+import org.joda.time.LocalDate
 import java.io.File
+import java.util.*
 
 /**
- * Writes the journal metadata to a local directory
+ * Outputs each file, with the journal's publication date as
+ * timestamp.
+ *
+ * This is mainly used for windowing.
  */
-internal class Write(private val dist: File) : DoFn<Journal, Journal>() {
-
-    init {
-        require(dist.isDirectory) {
-            "Expecting a directory, but got $dist"
-        }
-    }
+internal class AddJournalTimestamp : DoFn<File, File>() {
 
     @ProcessElement
     fun processElement(
-        @Element journal: Journal,
-        outputReceiver: OutputReceiver<Journal>
+        @Element file: File,
+        outputReceiver: OutputReceiver<File>
     ) {
+        val name = file.nameWithoutExtension
+        val json = file.parentFile.resolve("$name.json")
+        val journal = Journal.fromJson(json.readText())
 
-        val dir = directoryFor(dist, journal)
-        dir.mkdirs()
-
-        val json = dir.resolve("journal-${journal.number}.json")
-        if (!json.exists()) {
-            json.writeText(journal.asJson())
+        val localDate = journal.date.let {
+            val d = Date(it.toEpochDay())
+            LocalDate.fromDateFields(d)
         }
-
-        outputReceiver.output(journal)
+        val timestamp = localDate.toDateTimeAtStartOfDay().toInstant()
+        outputReceiver.outputWithTimestamp(file, timestamp)
     }
 }

@@ -17,22 +17,9 @@
  */
 package com.github.devcsrj.klerk
 
-import java.io.Serializable
-import java.net.URI
-import java.time.LocalDate
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.KotlinModule
 
-data class Journal(
-    val chamber: Chamber,
-    val congress: Congress,
-    val session: Session,
-    val number: Int,
-    val date: LocalDate,
-    val documentUri: URI
-) : Serializable {
-
-    companion object {}
-
-    override fun toString(): String {
-        return "($congress | $session) $chamber Journal $number - $date"
-    }
+internal val OBJECT_MAPPER = ObjectMapper().apply {
+    registerModule(KotlinModule())
 }
