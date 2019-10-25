@@ -65,9 +65,11 @@ internal fun Mat.drawContoursOn(output: Mat) {
     val contours = MatVector()
     findContours(this, contours, RETR_EXTERNAL, CHAIN_APPROX_SIMPLE)
     for ((i, contour) in contours.get().withIndex()) {
-        val rect = boundingRect(contour)
+        val minRect = minAreaRect(contour)
+        val rect = minRect.boundingRect()
         val label = "[$i] (${rect.x()}, ${rect.y()}), " +
-                "${rect.width()}w x ${rect.height()}h "
+                "${rect.width()}w x ${rect.height()}h " +
+                "- ${minRect.angle()} degrees"
         val color = Scalar.GREEN
         rectangle(output, rect, color)
         putText(

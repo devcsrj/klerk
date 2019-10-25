@@ -45,6 +45,7 @@ fun main(args: Array<String>) {
         .apply(ParDo.of(AddJournalTimestamp()))
         .apply(Window.into<File>(FixedWindows.of(Duration.standardDays(1))))
         .apply("ToImage", ParDo.of(PdfToImage()))
+        .apply("Deskew", ParDo.of(DeskewContent()))
         .apply("Crop", ParDo.of(CropContent()))
 
     pipeline.run().waitUntilFinish()
