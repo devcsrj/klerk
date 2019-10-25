@@ -147,8 +147,8 @@ internal class CropContent : DoFn<File, File>() {
 
         val x = max(border.x() - 50, 0)
         val y = border.y() + border.height() - 10
-        val width = min(border.width() + 80, dimension.width)
-        val height = dimension.height - round(y * 1.5).toInt()
+        val width = min(border.width() + x, dimension.width)
+        val height = min(dimension.height - round(y * 1.5).toInt(), dimension.height)
 
         return Rect(x, y, width, height)
     }

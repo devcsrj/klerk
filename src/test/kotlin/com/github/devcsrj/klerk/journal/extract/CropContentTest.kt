@@ -33,15 +33,17 @@ object CropContentTest : Spek({
          * Path => expected cropped dimension
          */
         val resources: Map<String, Dimension> = mapOf(
-            "17th-h-r2-j28-p2.png" to Dimension(2192, 3180),
-            "17th-s-r1-j72-p2.png" to Dimension(2241, 3119),
-            "17th-s-r1-j72-p1.png" to Dimension(2251, 3111)
+            "17th-h-r2-j28-p2.png" to Dimension(2178, 3180),
+            "17th-s-r1-j72-p2.png" to Dimension(2290, 3119),
+            "17th-s-r1-j72-p1.png" to Dimension(2305, 3111),
+            "17th-s-r3-j16-p21.png" to Dimension(1140, 1472)
         )
 
         resources.forEach { (resource, expected) ->
             test("Crop $resource") {
                 val png = "/journal/crop/$resource"
-                val original = Files.createTempFile("", ".png").toFile()
+                val prefix = resource.substringBeforeLast('.')
+                val original = Files.createTempFile(prefix, ".png").toFile()
                 original.outputStream().use { sink ->
                     javaClass.getResourceAsStream(png).use { src ->
                         src.copyTo(sink)
@@ -78,7 +80,8 @@ object CropContentTest : Spek({
 
         resources.forEach { resource ->
             val png = "/journal/crop/$resource"
-            val original = Files.createTempFile("", ".png").toFile()
+            val prefix = resource.substringBeforeLast('.')
+            val original = Files.createTempFile(prefix, ".png").toFile()
             original.outputStream().use { sink ->
                 javaClass.getResourceAsStream(png).use { src ->
                     src.copyTo(sink)
