@@ -34,11 +34,11 @@ object CropContentTest : Spek({
 
         Scenario("page has border") {
 
-            val png = "/17/house/regular-2/journal/journal-28-p2.png"
+            val png = "/journal/crop/17th-h-r2-j28-p2.png"
             lateinit var original: File
             lateinit var cropped: File
 
-            Given("page 2 of 17-R2-J28") {
+            Given("17th-h-r2-j28-p2") {
                 original = Files.createTempFile("", ".png").toFile()
                 original.outputStream().use { sink ->
                     javaClass.getResourceAsStream(png).use { src ->
@@ -74,10 +74,10 @@ object CropContentTest : Spek({
 
         Scenario("page has no border") {
 
-            val png = "/17/house/regular-2/journal/journal-28-p1.png"
+            val png = "/journal/crop/17th-h-r2-j28-p1.png"
             lateinit var original: File
 
-            Given("page 1 of 17-R2-J28") {
+            Given("17th-h-r2-j28-p1") {
                 original = Files.createTempFile("", ".png").toFile()
                 original.outputStream().use { sink ->
                     javaClass.getResourceAsStream(png).use { src ->
@@ -109,11 +109,11 @@ object CropContentTest : Spek({
 
         Scenario("page has border") {
 
-            val png = "/17/senate/regular-1/journal/journal-72-p2.png"
+            val png = "/journal/crop/17th-s-r1-j72-p2.png"
             lateinit var original: File
             lateinit var cropped: File
 
-            Given("page 2 of 17-R2-J72") {
+            Given("17th-s-r1-j72-p2.png") {
                 original = Files.createTempFile("", ".png").toFile()
                 original.outputStream().use { sink ->
                     javaClass.getResourceAsStream(png).use { src ->
@@ -149,11 +149,11 @@ object CropContentTest : Spek({
 
         Scenario("page has border and large whitespace") {
 
-            val png = "/17/senate/regular-1/journal/journal-72-p1.png"
+            val png = "/journal/crop/17th-s-r1-j72-p1.png"
             lateinit var original: File
             lateinit var cropped: File
 
-            Given("page 1 of 17-R2-J72") {
+            Given("17th-s-r1-j72-p1.png") {
                 original = Files.createTempFile("", ".png").toFile()
                 original.outputStream().use { sink ->
                     javaClass.getResourceAsStream(png).use { src ->
@@ -189,10 +189,10 @@ object CropContentTest : Spek({
 
         Scenario("page has no border") {
 
-            val png = "/17/senate/regular-1/journal/journal-72-p0.png"
+            val png = "/journal/crop/17th-s-r1-j72-p0.png"
             lateinit var original: File
 
-            Given("page 0 of 17-R2-J72") {
+            Given("17th-s-r1-j72-p0.png") {
                 original = Files.createTempFile("", ".png").toFile()
                 original.outputStream().use { sink ->
                     javaClass.getResourceAsStream(png).use { src ->
