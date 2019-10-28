@@ -58,7 +58,7 @@ internal class CropContent : DoFn<File, File>() {
         val dimension = readDimensions(file)
         val outputFile = file.parentFile.resolve("$name-cropped.png")
         if (outputFile.exists()) {
-            outputReceiver.output(file)
+            outputReceiver.output(outputFile)
             return
         }
 
@@ -83,6 +83,7 @@ internal class CropContent : DoFn<File, File>() {
                     outputReceiver.output(outputFile)
                 } catch (e: Exception) {
                     logger.error("⚠️ Failed to crop: $file", e)
+                    outputReceiver.output(file) // the original
                 }
             } else {
                 outputReceiver.output(file) // the original
@@ -104,7 +105,7 @@ internal class CropContent : DoFn<File, File>() {
         val dest = Mat()
         dilate(
             src, dest, kernel,
-            Point(-1, -1), 4, BORDER_CONSTANT,
+            Point(-1, -1), 3, BORDER_CONSTANT,
             morphologyDefaultBorderValue()
         )
         return dest
@@ -145,8 +146,8 @@ internal class CropContent : DoFn<File, File>() {
 
         val x = max(border.x() - 50, 0)
         val y = border.y() + border.height() - 10
-        val width = min(border.width() + x, dimension.width)
-        val height = min(dimension.height - round(y * 1.5).toInt(), dimension.height)
+        val width = min(border.width() + x + 50, dimension.width - x)
+        val height = min(dimension.height - round(y * 1.5).toInt(), dimension.height - y)
 
         return Rect(x, y, width, height)
     }

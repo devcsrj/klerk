@@ -31,10 +31,10 @@ object CropContentTest : Spek({
          * Path => expected cropped dimension
          */
         val resources: Map<String, Dimension> = mapOf(
-            "17th-h-r2-j28-p2.png" to Dimension(2178, 3180),
-            "17th-s-r1-j72-p2.png" to Dimension(2290, 3119),
-            "17th-s-r1-j72-p1.png" to Dimension(2305, 3111),
-            "17th-s-r3-j16-p21.png" to Dimension(1140, 1472)
+            "17th-h-r2-j28-p2.png" to Dimension(2228, 3180),
+            "17th-s-r1-j72-p2.png" to Dimension(2340, 3119),
+            "17th-s-r1-j72-p1.png" to Dimension(2355, 3111),
+            "17th-s-r3-j16-p21.png" to Dimension(1183, 1472)
         )
 
         resources.forEach { (resource, expected) ->

@@ -44,7 +44,7 @@ internal class DeskewContent : DoFn<File, File>() {
         val name = file.nameWithoutExtension
         val outputFile = file.parentFile.resolve("$name-deskewed.png")
         if (outputFile.exists()) {
-            outputReceiver.output(file)
+            outputReceiver.output(outputFile)
             return
         }
 
@@ -65,10 +65,11 @@ internal class DeskewContent : DoFn<File, File>() {
         }
         try {
             imwrite(outputFile.toString(), deskewed)
+            outputReceiver.output(outputFile)
         } catch (e: Exception) {
             logger.error("⚠️ Failed to deskew: $file", e)
+            outputReceiver.output(file) // original
         }
-        outputReceiver.output(file)
     }
 
     private fun deskew(src: Mat, dilated: Mat): Mat {
@@ -119,12 +120,12 @@ internal class DeskewContent : DoFn<File, File>() {
     }
 
     private fun dilateContent(src: Mat): Mat {
-        val kernel = Mat.ones(40, 20, CV_8UC1).asMat()
+        val kernel = Mat.ones(10, 15, CV_8UC1).asMat()
 //        val kernel = Mat.ones(100, 60, CV_8UC1).asMat()
         val dest = Mat()
         dilate(
             src, dest, kernel,
-            Point(-1, -1), 4, BORDER_CONSTANT,
+            Point(-1, -1), 3, BORDER_CONSTANT,
             morphologyDefaultBorderValue()
         )
         return dest

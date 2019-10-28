@@ -20,30 +20,37 @@ import org.apache.beam.sdk.testing.TestPipeline
 import org.apache.beam.sdk.transforms.Create
 import org.apache.beam.sdk.transforms.ParDo
 import org.spekframework.spek2.Spek
-import org.spekframework.spek2.style.gherkin.Feature
-import java.io.File
 import java.nio.file.Files
 
 object DeskewContentTest : Spek({
 
-    Feature("deskew senate journal") {
+    group("skewed images") {
 
-        Scenario("a content page") {
+        val resources: List<String> = listOf(
+            "17th-h-r3-j31-p13.png",
+            "17th-s-r3-j12-p0.png",
+            "17th-s-r3-j3-p1.png",
+            "17th-s-r3-j1-p16.png",
+            "17th-s-r3-j61-p48.png"
+        )
 
-            val png = "/journal/deskew/17th-h-r3-j31-p13.png"
-            lateinit var original: File
+        resources.forEach { resource ->
 
-            Given("17th-h-r3-j31-p13") {
-                original = Files.createTempFile("", ".png").toFile()
+            test("Deskew $resource", timeout = 30 * 1000) {
+                val png = "/journal/deskew/$resource"
+                val prefix = resource.substringBeforeLast('.')
+                val original = Files.createTempFile(prefix, ".png").toFile()
                 original.outputStream().use { sink ->
                     javaClass.getResourceAsStream(png).use { src ->
                         src.copyTo(sink)
                     }
                 }
                 original.deleteOnExit()
-            }
 
-            When("processed", timeout = 60 * 1000) {
+                val filename = "${original.nameWithoutExtension}-deskewed.png"
+                val deskewed = original.parentFile.resolve(filename)
+                deskewed.deleteOnExit()
+
                 val pipeline = TestPipeline.create()
                     .enableAbandonedNodeEnforcement(false)
                 val input = pipeline.apply(Create.of(original))
@@ -51,82 +58,11 @@ object DeskewContentTest : Spek({
 
                 PAssert
                     .that(output)
-                    .containsInAnyOrder(original)
+                    .containsInAnyOrder(deskewed)
 
                 pipeline.run()
-            }
 
-            Then("content is deskewed") {
-                // Don't know how to assert that content is skewed without
-                // loading the image again...
-            }
-        }
-
-        Scenario("a title page") {
-
-            val png = "/journal/deskew/17th-s-r3-j12-p0.png"
-            lateinit var original: File
-
-            Given("17th-s-r3-j12-p0") {
-                original = Files.createTempFile("", ".png").toFile()
-                original.outputStream().use { sink ->
-                    javaClass.getResourceAsStream(png).use { src ->
-                        src.copyTo(sink)
-                    }
-                }
-                original.deleteOnExit()
-            }
-
-            When("processed", timeout = 60 * 1000) {
-                val pipeline = TestPipeline.create()
-                    .enableAbandonedNodeEnforcement(false)
-                val input = pipeline.apply(Create.of(original))
-                val output = input.apply(ParDo.of(DeskewContent()))
-
-                PAssert
-                    .that(output)
-                    .containsInAnyOrder(original)
-
-                pipeline.run()
-            }
-
-            Then("content is deskewed") {
-                // Don't know how to assert that content is skewed without
-                // loading the image again...
-            }
-        }
-
-        Scenario("a start page") {
-
-            val png = "/journal/deskew/17th-s-r3-j3-p1.png"
-            lateinit var original: File
-
-            Given("17th-s-r3-j3-p1.png") {
-                original = Files.createTempFile("", ".png").toFile()
-                original.outputStream().use { sink ->
-                    javaClass.getResourceAsStream(png).use { src ->
-                        src.copyTo(sink)
-                    }
-                }
-                original.deleteOnExit()
-            }
-
-            When("processed", timeout = 60 * 1000) {
-                val pipeline = TestPipeline.create()
-                    .enableAbandonedNodeEnforcement(false)
-                val input = pipeline.apply(Create.of(original))
-                val output = input.apply(ParDo.of(DeskewContent()))
-
-                PAssert
-                    .that(output)
-                    .containsInAnyOrder(original)
-
-                pipeline.run()
-            }
-
-            Then("content is deskewed") {
-                // Don't know how to assert that content is skewed without
-                // loading the image again...
+                // Don't know how to assert content without scanning again println()
             }
         }
     }
