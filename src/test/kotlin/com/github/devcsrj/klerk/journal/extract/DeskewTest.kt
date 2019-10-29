@@ -53,9 +53,10 @@ object DeskewTest : Spek({
             "17th-s-r3-j12-p0.png",
             "17th-s-r3-j3-p1.png",
             "17th-s-r3-j1-p16.png",
-            "17th-s-r3-j61-p48.png"
+            "17th-s-r3-j61-p48.png",
+            "17th-s-r3-j1-p20.png",
+            "17th-s-r3-j42-p0.png"
         )
-
 
         val dir = File(System.getProperty("java.io.tmpdir"))
         val filename = "journal-${journal.number}-p1-deskewed.png"

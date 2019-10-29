@@ -24,6 +24,7 @@ import org.bytedeco.opencv.global.opencv_imgcodecs.imwrite
 import org.bytedeco.opencv.global.opencv_imgproc.*
 import org.bytedeco.opencv.opencv_core.*
 import org.slf4j.LoggerFactory
+import kotlin.math.roundToInt
 
 /**
  * Deskews image files.
@@ -86,17 +87,27 @@ internal class Deskew : DoFn<KV<Journal, Page>, KV<Journal, Page>>() {
         val contours = MatVector()
         findContours(dilated, contours, RETR_EXTERNAL, CHAIN_APPROX_SIMPLE)
 
-        val minAreaRects = contours.get()
-            .map { minAreaRect(it) }
-            .sortedBy { it.angle() }
-        if (minAreaRects.isEmpty())
-            return src
+        val centerX = src.cols() / 2F
+        val centerY = src.rows() / 2F
+        val center = Point2f(centerX, centerY)
 
-        // Take the median angle.
-        // This ensures that circles (whose angle is always skewed when using
-        // the minAreaRect) doesn't become the base skew angle of the entire page
-        val i: Int = minAreaRects.size / 2
-        return deskew(src, minAreaRects[i])
+        // Select the rectagle closest to the center
+        val closest = Comparator<RotatedRect> { left, right ->
+            (left.center().distanceFrom(center) - right.center().distanceFrom(center)).roundToInt()
+        }
+
+        // The selected base rectangle should not be the entire page
+        val reduction = .10
+        val maxArea = src.rows().let { it - (it * reduction) } *
+                src.cols().let { it - (it * reduction) }
+
+        val centerMost = contours.get()
+            .map { minAreaRect(it) }
+            .filter { it.boundingRect().area() < maxArea }
+            .sortedWith(closest)
+            .firstOrNull() ?: return src
+
+        return deskew(src, centerMost)
     }
 
     private fun deskew(src: Mat, rect: RotatedRect): Mat {
