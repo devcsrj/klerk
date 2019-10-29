@@ -15,14 +15,36 @@
  */
 package com.github.devcsrj.klerk.journal.extract
 
+import com.github.devcsrj.klerk.Chamber
+import com.github.devcsrj.klerk.Congress
+import com.github.devcsrj.klerk.Journal
+import com.github.devcsrj.klerk.Session
 import org.apache.beam.sdk.testing.PAssert
 import org.apache.beam.sdk.testing.TestPipeline
 import org.apache.beam.sdk.transforms.Create
+import org.apache.beam.sdk.transforms.MapElements
 import org.apache.beam.sdk.transforms.ParDo
+import org.apache.beam.sdk.transforms.SimpleFunction
+import org.apache.beam.sdk.values.KV
 import org.spekframework.spek2.Spek
-import java.nio.file.Files
+import java.io.File
+import java.net.URI
+import java.time.LocalDate
+import java.time.Month
 
 object DeskewContentTest : Spek({
+
+    val journal = Journal(
+        chamber = Chamber.SENATE,
+        congress = Congress(17),
+        session = Session.regular(1),
+        number = 1,
+        date = LocalDate.of(2019, Month.OCTOBER, 29),
+        documentUri = URI.create("https://example.com")
+    )
+    val asPage = object : SimpleFunction<File, KV<Journal, Page>>() {
+        override fun apply(input: File) = KV.of(journal, Page(1, input))
+    }
 
     group("skewed images") {
 
@@ -34,12 +56,21 @@ object DeskewContentTest : Spek({
             "17th-s-r3-j61-p48.png"
         )
 
+
+        val dir = File(System.getProperty("java.io.tmpdir"))
+        val filename = "journal-${journal.number}-p1-deskewed.png"
+        val deskewed = dir.resolve(filename)
+
+        beforeEachTest {
+            deskewed.delete()
+        }
+
         resources.forEach { resource ->
 
             test("Deskew $resource", timeout = 30 * 1000) {
                 val png = "/journal/deskew/$resource"
                 val prefix = resource.substringBeforeLast('.')
-                val original = Files.createTempFile(prefix, ".png").toFile()
+                val original = dir.resolve("$prefix.png")
                 original.outputStream().use { sink ->
                     javaClass.getResourceAsStream(png).use { src ->
                         src.copyTo(sink)
@@ -47,18 +78,16 @@ object DeskewContentTest : Spek({
                 }
                 original.deleteOnExit()
 
-                val filename = "${original.nameWithoutExtension}-deskewed.png"
-                val deskewed = original.parentFile.resolve(filename)
-                deskewed.deleteOnExit()
-
                 val pipeline = TestPipeline.create()
                     .enableAbandonedNodeEnforcement(false)
-                val input = pipeline.apply(Create.of(original))
+                val input = pipeline
+                    .apply(Create.of(original))
+                    .apply(MapElements.via(asPage))
                 val output = input.apply(ParDo.of(DeskewContent()))
 
                 PAssert
                     .that(output)
-                    .containsInAnyOrder(deskewed)
+                    .containsInAnyOrder(KV.of(journal, Page(1, deskewed)))
 
                 pipeline.run()
 

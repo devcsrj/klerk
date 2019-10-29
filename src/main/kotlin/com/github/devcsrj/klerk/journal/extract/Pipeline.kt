@@ -19,9 +19,6 @@ import org.apache.beam.sdk.Pipeline
 import org.apache.beam.sdk.options.PipelineOptionsFactory
 import org.apache.beam.sdk.transforms.Create
 import org.apache.beam.sdk.transforms.ParDo
-import org.apache.beam.sdk.transforms.windowing.FixedWindows
-import org.apache.beam.sdk.transforms.windowing.Window
-import org.joda.time.Duration
 import java.io.File
 
 fun main(args: Array<String>) {
@@ -40,8 +37,7 @@ fun main(args: Array<String>) {
 
     pipeline
         .apply("List", Create.of(src))
-        .apply(ParDo.of(AddJournalTimestamp()))
-        .apply(Window.into<File>(FixedWindows.of(Duration.standardDays(1))))
+        .apply("LoadInfo", ParDo.of(LoadJournalInfo()))
         .apply("ToImage", ParDo.of(PdfToImage()))
         .apply("Deskew", ParDo.of(DeskewContent()))
         .apply("Crop", ParDo.of(CropContent()))

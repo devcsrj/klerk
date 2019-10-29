@@ -15,7 +15,9 @@
  */
 package com.github.devcsrj.klerk.journal.extract
 
+import com.github.devcsrj.klerk.Journal
 import org.apache.beam.sdk.transforms.DoFn
+import org.apache.beam.sdk.values.KV
 import org.apache.pdfbox.io.MemoryUsageSetting
 import org.apache.pdfbox.pdmodel.PDDocument
 import org.apache.pdfbox.rendering.ImageType
@@ -36,33 +38,34 @@ import java.io.File
  * - ...
  * ```
  */
-internal class PdfToImage : DoFn<File, File>() {
+internal class PdfToImage : DoFn<KV<Journal, File>, KV<Journal, Page>>() {
 
     private val logger = LoggerFactory.getLogger(PdfToImage::class.java)
 
-    @ProcessElement
-    fun processElement(
-        @Element file: File,
-        outputReceiver: OutputReceiver<File>
-    ) {
+    @DoFn.ProcessElement
+    fun processElement(context: ProcessContext) {
 
+        val element = context.element()
+        val journal = element.key
+        val file = element.value
         logger.info("📷 $file")
         val pages = renderPages(file)
         for (page in pages) {
-            outputReceiver.output(page)
+            val output = KV.of(journal, page)
+            context.output(output)
         }
     }
 
-    private fun renderPages(file: File): Collection<File> {
+    private fun renderPages(file: File): Collection<Page> {
         val prefix = file.nameWithoutExtension
         val dir = file.parentFile
         val memory = MemoryUsageSetting.setupTempFileOnly()
-        val files = mutableListOf<File>()
+        val files = mutableListOf<Page>()
         PDDocument.load(file, memory).use { pdf ->
             pdf.resourceCache = null // We're consuming too much memory
 
             val renderer = PDFRenderer(pdf)
-            for (page in 0 until pdf.numberOfPages) {
+            for ((i, page) in (0 until pdf.numberOfPages).withIndex()) {
                 val png = dir.resolve("$prefix-p$page.png")
                 if (!png.isFile) {
                     val img = renderer.renderImageWithDPI(page, 144F, ImageType.GRAY)
@@ -71,7 +74,7 @@ internal class PdfToImage : DoFn<File, File>() {
                     }
                     img.flush()
                 }
-                files.add(png)
+                files.add(Page(i, png))
             }
         }
         return files

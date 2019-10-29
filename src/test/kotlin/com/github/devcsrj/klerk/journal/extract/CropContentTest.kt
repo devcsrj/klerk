@@ -15,33 +15,63 @@
  */
 package com.github.devcsrj.klerk.journal.extract
 
+import com.github.devcsrj.klerk.Chamber
+import com.github.devcsrj.klerk.Congress
+import com.github.devcsrj.klerk.Journal
+import com.github.devcsrj.klerk.Session
 import org.apache.beam.sdk.testing.PAssert
 import org.apache.beam.sdk.testing.TestPipeline
 import org.apache.beam.sdk.transforms.Create
+import org.apache.beam.sdk.transforms.MapElements
 import org.apache.beam.sdk.transforms.ParDo
+import org.apache.beam.sdk.transforms.SimpleFunction
+import org.apache.beam.sdk.values.KV
 import org.spekframework.spek2.Spek
 import java.awt.Dimension
-import java.nio.file.Files
+import java.io.File
+import java.net.URI
+import java.time.LocalDate
+import java.time.Month
 import kotlin.test.assertEquals
 
 object CropContentTest : Spek({
 
+    val journal = Journal(
+        chamber = Chamber.SENATE,
+        congress = Congress(17),
+        session = Session.regular(1),
+        number = 1,
+        date = LocalDate.of(2019, Month.OCTOBER, 29),
+        documentUri = URI.create("https://example.com")
+    )
+    val asPage = object : SimpleFunction<File, KV<Journal, Page>>() {
+        override fun apply(input: File) = KV.of(journal, Page(1, input))
+    }
+    val dir = File(System.getProperty("java.io.tmpdir"))
+    val filename = "journal-${journal.number}-p1-cropped.png"
+    val cropped = dir.resolve(filename)
+
+    beforeEachTest {
+        cropped.delete()
+    }
+
     group("bordered images") {
+
         /**
          * Path => expected cropped dimension
          */
         val resources: Map<String, Dimension> = mapOf(
-            "17th-h-r2-j28-p2.png" to Dimension(2228, 3180),
-            "17th-s-r1-j72-p2.png" to Dimension(2340, 3119),
-            "17th-s-r1-j72-p1.png" to Dimension(2355, 3111),
-            "17th-s-r3-j16-p21.png" to Dimension(1183, 1472)
+            "17th-h-r2-j28-p2.png" to Dimension(2221, 3187),
+            "17th-s-r1-j72-p2.png" to Dimension(2333, 3126),
+            "17th-s-r1-j72-p1.png" to Dimension(2348, 3118),
+            "17th-s-r3-j16-p21.png" to Dimension(1129, 1480)
         )
 
         resources.forEach { (resource, expected) ->
             test("Crop $resource") {
                 val png = "/journal/crop/$resource"
                 val prefix = resource.substringBeforeLast('.')
-                val original = Files.createTempFile(prefix, ".png").toFile()
+                val original = dir.resolve("$prefix.png")
                 original.outputStream().use { sink ->
                     javaClass.getResourceAsStream(png).use { src ->
                         src.copyTo(sink)
@@ -49,18 +79,16 @@ object CropContentTest : Spek({
                 }
                 original.deleteOnExit()
 
-                val filename = "${original.nameWithoutExtension}-cropped.png"
-                val cropped = original.parentFile.resolve(filename)
-                cropped.deleteOnExit()
-
                 val pipeline = TestPipeline.create()
                     .enableAbandonedNodeEnforcement(false)
-                val input = pipeline.apply(Create.of(original))
+                val input = pipeline
+                    .apply(Create.of(original))
+                    .apply(MapElements.via(asPage))
                 val output = input.apply(ParDo.of(CropContent()))
 
                 PAssert
                     .that(output)
-                    .containsInAnyOrder(cropped)
+                    .containsInAnyOrder(KV.of(journal, Page(1, cropped)))
 
                 pipeline.run()
 
@@ -71,31 +99,37 @@ object CropContentTest : Spek({
     }
 
     group("borderless images") {
+
         val resources: List<String> = listOf(
             "17th-h-r2-j28-p1.png",
             "17th-s-r1-j72-p0.png"
         )
 
         resources.forEach { resource ->
-            val png = "/journal/crop/$resource"
-            val prefix = resource.substringBeforeLast('.')
-            val original = Files.createTempFile(prefix, ".png").toFile()
-            original.outputStream().use { sink ->
-                javaClass.getResourceAsStream(png).use { src ->
-                    src.copyTo(sink)
+
+            test("Crop $resource") {
+                val png = "/journal/crop/$resource"
+                val prefix = resource.substringBeforeLast('.')
+                val original = dir.resolve("$prefix.png")
+                original.outputStream().use { sink ->
+                    javaClass.getResourceAsStream(png).use { src ->
+                        src.copyTo(sink)
+                    }
                 }
+                original.deleteOnExit()
+
+                val pipeline = TestPipeline.create()
+                    .enableAbandonedNodeEnforcement(false)
+                val input = pipeline
+                    .apply(Create.of(original))
+                    .apply(MapElements.via(asPage))
+                val output = input.apply(ParDo.of(CropContent()))
+
+                PAssert
+                    .that(output)
+                    .containsInAnyOrder(KV.of(journal, Page(1, original)))
+                pipeline.run()
             }
-            original.deleteOnExit()
-
-            val pipeline = TestPipeline.create()
-                .enableAbandonedNodeEnforcement(false)
-            val input = pipeline.apply(Create.of(original))
-            val output = input.apply(ParDo.of(CropContent()))
-
-            PAssert
-                .that(output)
-                .containsInAnyOrder(original)
-            pipeline.run()
         }
     }
 })

@@ -15,14 +15,15 @@
  */
 package com.github.devcsrj.klerk.journal.extract
 
+import com.github.devcsrj.klerk.Journal
 import org.apache.beam.sdk.transforms.DoFn
+import org.apache.beam.sdk.values.KV
 import org.bytedeco.opencv.global.opencv_core.*
 import org.bytedeco.opencv.global.opencv_imgcodecs.imread
 import org.bytedeco.opencv.global.opencv_imgcodecs.imwrite
 import org.bytedeco.opencv.global.opencv_imgproc.*
 import org.bytedeco.opencv.opencv_core.*
 import org.slf4j.LoggerFactory
-import java.io.File
 
 /**
  * Deskews image files.
@@ -31,24 +32,33 @@ import java.io.File
  * file sometimes is skewed. This step ensures that the content
  * is upright prior OCR.
  */
-internal class DeskewContent : DoFn<File, File>() {
+internal class DeskewContent : DoFn<KV<Journal, Page>, KV<Journal, Page>>() {
 
     private val logger = LoggerFactory.getLogger(DeskewContent::class.java)
 
     @ProcessElement
-    fun processElement(
-        @Element file: File,
-        outputReceiver: OutputReceiver<File>
-    ) {
+    fun processElement(context: ProcessContext) {
 
-        val name = file.nameWithoutExtension
-        val outputFile = file.parentFile.resolve("$name-deskewed.png")
-        if (outputFile.exists()) {
-            outputReceiver.output(outputFile)
-            return
-        }
+        val element = context.element()
+        val journal = element.key!!
+        val page = element.value
 
-        logger.info("📏 $file")
+        logger.info("📏 Journal ${journal.number} - $page")
+        val deskewedPage = deskew(journal, page)
+        context.output(KV.of(journal, deskewedPage))
+    }
+
+    private fun deskew(journal: Journal, page: Page): Page {
+        val file = page.file
+        val name = "journal-${journal.number}-p${page.number}-deskewed.png"
+        val outputFile = file.parentFile.resolve(name)
+        val deskewedPage = Page(
+            number = page.number,
+            file = outputFile
+        )
+        if (outputFile.exists())
+            return deskewedPage
+
         val deskewed = imread(file.toString()).use { src ->
             invertImage(src).use { inverted ->
                 dilateContent(inverted).use { dilated ->
@@ -63,12 +73,12 @@ internal class DeskewContent : DoFn<File, File>() {
                 }
             }
         }
-        try {
+        return try {
             imwrite(outputFile.toString(), deskewed)
-            outputReceiver.output(outputFile)
+            deskewedPage
         } catch (e: Exception) {
             logger.error("⚠️ Failed to deskew: $file", e)
-            outputReceiver.output(file) // original
+            page
         }
     }
 

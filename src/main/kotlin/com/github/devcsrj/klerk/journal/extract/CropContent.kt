@@ -15,7 +15,9 @@
  */
 package com.github.devcsrj.klerk.journal.extract
 
+import com.github.devcsrj.klerk.Journal
 import org.apache.beam.sdk.transforms.DoFn
+import org.apache.beam.sdk.values.KV
 import org.bytedeco.opencv.global.opencv_core.BORDER_CONSTANT
 import org.bytedeco.opencv.global.opencv_core.CV_8UC1
 import org.bytedeco.opencv.global.opencv_imgcodecs.imread
@@ -44,25 +46,34 @@ import kotlin.math.round
  *
  * The new image is written as `${filename}-cropped.png`
  */
-internal class CropContent : DoFn<File, File>() {
+internal class CropContent : DoFn<KV<Journal, Page>, KV<Journal, Page>>() {
 
     private val logger = LoggerFactory.getLogger(CropContent::class.java)
 
     @ProcessElement
-    fun processElement(
-        @Element file: File,
-        outputReceiver: OutputReceiver<File>
-    ) {
+    fun processElement(context: ProcessContext) {
 
-        val name = file.nameWithoutExtension
+        val element = context.element()
+        val journal = element.key!!
+        val page = element.value
+
+        logger.info("✂ Journal ${journal.number} - $page")
+        val croppedPage = cropMargin(journal, page)
+        context.output(KV.of(journal, croppedPage))
+    }
+
+    private fun cropMargin(journal: Journal, page: Page): Page {
+        val file = page.file
+        val name = "journal-${journal.number}-p${page.number}-cropped.png"
+        val outputFile = file.parentFile.resolve(name)
+        val croppedPage = Page(
+            number = page.number,
+            file = outputFile
+        )
+        if (outputFile.exists())
+            return croppedPage
+
         val dimension = readDimensions(file)
-        val outputFile = file.parentFile.resolve("$name-cropped.png")
-        if (outputFile.exists()) {
-            outputReceiver.output(outputFile)
-            return
-        }
-
-        logger.info("✂ $file")
         imread(file.toString()).use { src ->
             val region = invertImage(src).use { inverted ->
                 dilateContent(inverted).use { dilated ->
@@ -76,20 +87,19 @@ internal class CropContent : DoFn<File, File>() {
                     findContent(dilated, dimension)
                 }
             }
-            if (region != null) {
+            return if (region != null) {
                 try {
                     val dest = Mat(src, region)
                     imwrite(outputFile.toString(), dest)
-                    outputReceiver.output(outputFile)
+                    croppedPage
                 } catch (e: Exception) {
                     logger.error("⚠️ Failed to crop: $file", e)
-                    outputReceiver.output(file) // the original
+                    page
                 }
             } else {
-                outputReceiver.output(file) // the original
+                page
             }
         }
-
     }
 
     private fun readDimensions(file: File): Dimension {
