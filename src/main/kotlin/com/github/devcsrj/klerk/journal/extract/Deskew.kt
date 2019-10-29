@@ -32,9 +32,9 @@ import org.slf4j.LoggerFactory
  * file sometimes is skewed. This step ensures that the content
  * is upright prior OCR.
  */
-internal class DeskewContent : DoFn<KV<Journal, Page>, KV<Journal, Page>>() {
+internal class Deskew : DoFn<KV<Journal, Page>, KV<Journal, Page>>() {
 
-    private val logger = LoggerFactory.getLogger(DeskewContent::class.java)
+    private val logger = LoggerFactory.getLogger(Deskew::class.java)
 
     @ProcessElement
     fun processElement(context: ProcessContext) {

@@ -27,14 +27,12 @@ import org.apache.beam.sdk.transforms.ParDo
 import org.apache.beam.sdk.transforms.SimpleFunction
 import org.apache.beam.sdk.values.KV
 import org.spekframework.spek2.Spek
-import java.awt.Dimension
 import java.io.File
 import java.net.URI
 import java.time.LocalDate
 import java.time.Month
-import kotlin.test.assertEquals
 
-object CropContentTest : Spek({
+object DeskewTest : Spek({
 
     val journal = Journal(
         chamber = Chamber.SENATE,
@@ -47,68 +45,30 @@ object CropContentTest : Spek({
     val asPage = object : SimpleFunction<File, KV<Journal, Page>>() {
         override fun apply(input: File) = KV.of(journal, Page(1, input))
     }
-    val dir = File(System.getProperty("java.io.tmpdir"))
-    val filename = "journal-${journal.number}-p1-cropped.png"
-    val cropped = dir.resolve(filename)
 
-    beforeEachTest {
-        cropped.delete()
-    }
-
-    group("bordered images") {
-
-        /**
-         * Path => expected cropped dimension
-         */
-        val resources: Map<String, Dimension> = mapOf(
-            "17th-h-r2-j28-p2.png" to Dimension(2221, 3187),
-            "17th-s-r1-j72-p2.png" to Dimension(2333, 3126),
-            "17th-s-r1-j72-p1.png" to Dimension(2348, 3118),
-            "17th-s-r3-j16-p21.png" to Dimension(1129, 1480)
-        )
-
-        resources.forEach { (resource, expected) ->
-            test("Crop $resource") {
-                val png = "/journal/crop/$resource"
-                val prefix = resource.substringBeforeLast('.')
-                val original = dir.resolve("$prefix.png")
-                original.outputStream().use { sink ->
-                    javaClass.getResourceAsStream(png).use { src ->
-                        src.copyTo(sink)
-                    }
-                }
-                original.deleteOnExit()
-
-                val pipeline = TestPipeline.create()
-                    .enableAbandonedNodeEnforcement(false)
-                val input = pipeline
-                    .apply(Create.of(original))
-                    .apply(MapElements.via(asPage))
-                val output = input.apply(ParDo.of(CropContent()))
-
-                PAssert
-                    .that(output)
-                    .containsInAnyOrder(KV.of(journal, Page(1, cropped)))
-
-                pipeline.run()
-
-                val actual = Images.dimensionOf(cropped)
-                assertEquals(expected, actual)
-            }
-        }
-    }
-
-    group("borderless images") {
+    group("skewed images") {
 
         val resources: List<String> = listOf(
-            "17th-h-r2-j28-p1.png",
-            "17th-s-r1-j72-p0.png"
+            "17th-h-r3-j31-p13.png",
+            "17th-s-r3-j12-p0.png",
+            "17th-s-r3-j3-p1.png",
+            "17th-s-r3-j1-p16.png",
+            "17th-s-r3-j61-p48.png"
         )
+
+
+        val dir = File(System.getProperty("java.io.tmpdir"))
+        val filename = "journal-${journal.number}-p1-deskewed.png"
+        val deskewed = dir.resolve(filename)
+
+        beforeEachTest {
+            deskewed.delete()
+        }
 
         resources.forEach { resource ->
 
-            test("Crop $resource") {
-                val png = "/journal/crop/$resource"
+            test("Deskew $resource", timeout = 30 * 1000) {
+                val png = "/journal/deskew/$resource"
                 val prefix = resource.substringBeforeLast('.')
                 val original = dir.resolve("$prefix.png")
                 original.outputStream().use { sink ->
@@ -123,12 +83,15 @@ object CropContentTest : Spek({
                 val input = pipeline
                     .apply(Create.of(original))
                     .apply(MapElements.via(asPage))
-                val output = input.apply(ParDo.of(CropContent()))
+                val output = input.apply(ParDo.of(Deskew()))
 
                 PAssert
                     .that(output)
-                    .containsInAnyOrder(KV.of(journal, Page(1, original)))
+                    .containsInAnyOrder(KV.of(journal, Page(1, deskewed)))
+
                 pipeline.run()
+
+                // Don't know how to assert content without scanning again println()
             }
         }
     }

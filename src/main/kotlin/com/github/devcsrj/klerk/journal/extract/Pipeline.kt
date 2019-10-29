@@ -39,8 +39,8 @@ fun main(args: Array<String>) {
         .apply("List", Create.of(src))
         .apply("LoadInfo", ParDo.of(LoadJournalInfo()))
         .apply("ToImage", ParDo.of(PdfToImage()))
-        .apply("Deskew", ParDo.of(DeskewContent()))
-        .apply("Crop", ParDo.of(CropContent()))
+        .apply("Deskew", ParDo.of(Deskew()))
+        .apply("Crop", ParDo.of(Crop()))
 
     pipeline.run().waitUntilFinish()
 }

@@ -46,9 +46,9 @@ import kotlin.math.round
  *
  * The new image is written as `${filename}-cropped.png`
  */
-internal class CropContent : DoFn<KV<Journal, Page>, KV<Journal, Page>>() {
+internal class Crop : DoFn<KV<Journal, Page>, KV<Journal, Page>>() {
 
-    private val logger = LoggerFactory.getLogger(CropContent::class.java)
+    private val logger = LoggerFactory.getLogger(Crop::class.java)
 
     @ProcessElement
     fun processElement(context: ProcessContext) {
