@@ -15,9 +15,11 @@
  */
 package com.github.devcsrj.klerk.journal.extract
 
+import com.github.devcsrj.klerk.Journal
 import org.apache.beam.sdk.Pipeline
 import org.apache.beam.sdk.options.PipelineOptionsFactory
 import org.apache.beam.sdk.transforms.Create
+import org.apache.beam.sdk.transforms.GroupByKey
 import org.apache.beam.sdk.transforms.ParDo
 import java.io.File
 
@@ -34,6 +36,9 @@ fun main(args: Array<String>) {
         .toList()
 
     val pipeline = Pipeline.create(options)
+    pipeline.coderRegistry.apply {
+        registerCoderForClass(Journal::class.java, JournalCoder())
+    }
 
     pipeline
         .apply("List", Create.of(src))
@@ -41,6 +46,8 @@ fun main(args: Array<String>) {
         .apply("ToImage", ParDo.of(PdfToImage()))
         .apply("Deskew", ParDo.of(Deskew()))
         .apply("Crop", ParDo.of(Crop()))
+        .apply(GroupByKey.create())
+        .apply("ToText", ParDo.of(ImageToText()))
 
     pipeline.run().waitUntilFinish()
 }

@@ -45,6 +45,7 @@ dependencies {
     implementation("org.slf4j:slf4j-api:${slf4jVersion}")
     implementation("org.jsoup:jsoup:1.12.1")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.10.0")
+    implementation("de.ruedigermoeller:fst:2.57")
     implementation("com.squareup.okhttp3:okhttp:${okhttpVersion}")
     implementation("com.squareup.okhttp3:okhttp-urlconnection:${okhttpVersion}")
     implementation("org.apache.pdfbox:pdfbox:${pdfboxVersion}")
