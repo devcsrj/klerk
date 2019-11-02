@@ -62,7 +62,11 @@ object Images {
 internal fun Mat.drawContoursOn(output: Mat) {
     val contours = MatVector()
     findContours(this, contours, RETR_EXTERNAL, CHAIN_APPROX_SIMPLE)
-    for ((i, contour) in contours.get().withIndex()) {
+    contours.drawOn(output)
+}
+
+internal fun MatVector.drawOn(output: Mat) {
+    for ((i, contour) in this.get().withIndex()) {
         val minRect = minAreaRect(contour)
         val rect = minRect.boundingRect()
         val label = "[$i] (${rect.x()}, ${rect.y()}), " +

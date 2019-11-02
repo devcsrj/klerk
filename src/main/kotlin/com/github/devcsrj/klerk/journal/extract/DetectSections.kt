@@ -70,24 +70,32 @@ internal class DetectSections : DoFn<
     }
 
     private fun detectRectangles(original: Mat, contours: MatVector): List<Rect> {
-        val centerX = original.arrayWidth() / 2
-        return contours.get()
-            .map { boundingRect(it) }
-            .sortedWith(Comparator<Rect> { left, right ->
-                if (left.x() < centerX) {
-                    if (right.x() < centerX) {
-                        left.y() - right.y()
-                    } else {
-                        -1
-                    }
+        val rects = contours.get().map { boundingRect(it) }
+        var leftmost = original.arrayWidth()
+        var rightmost = 0
+        for (rect in rects) {
+            if (rect.x() < leftmost)
+                leftmost = rect.x()
+            if (rect.x() > rightmost)
+                rightmost = rect.x()
+        }
+        val centerX = (leftmost + rightmost) / 2
+
+        return rects.sortedWith(Comparator<Rect> { left, right ->
+            if (left.x() < centerX) {
+                if (right.x() < centerX) {
+                    left.y() - right.y()
                 } else {
-                    if (right.x() < centerX) {
-                        1
-                    } else {
-                        left.y() - right.y()
-                    }
+                    -1
                 }
-            })
+            } else {
+                if (right.x() < centerX) {
+                    1
+                } else {
+                    left.y() - right.y()
+                }
+            }
+        })
     }
 
     private fun invertImage(src: Mat): Mat {
@@ -95,7 +103,7 @@ internal class DetectSections : DoFn<
     }
 
     private fun dilateContent(src: Mat): Mat {
-        val kernel = Mat.ones(10, 15, CV_8UC1).asMat()
+        val kernel = Mat.ones(10, 25, CV_8UC1).asMat()
         val dest = Mat()
         dilate(
             src, dest, kernel,
