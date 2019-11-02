@@ -27,7 +27,7 @@ import java.time.LocalDate
 import java.time.Month
 import kotlin.test.assertEquals
 
-object JournalCoderTest : Spek({
+object FstCoderTest : Spek({
 
     test("encode-decode") {
         val original = Journal(
@@ -39,7 +39,7 @@ object JournalCoderTest : Spek({
             documentUri = URI.create("https://example.com")
         )
 
-        val coder = JournalCoder()
+        val coder = FstCoder<Journal>()
         val sink = ByteArrayOutputStream()
         coder.encode(original, sink)
 

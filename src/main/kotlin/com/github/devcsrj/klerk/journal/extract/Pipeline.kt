@@ -37,7 +37,7 @@ fun main(args: Array<String>) {
 
     val pipeline = Pipeline.create(options)
     pipeline.coderRegistry.apply {
-        registerCoderForClass(Journal::class.java, JournalCoder())
+        registerCoderForClass(Journal::class.java, FstCoder<Journal>())
     }
 
     pipeline
@@ -46,7 +46,9 @@ fun main(args: Array<String>) {
         .apply("ToImage", ParDo.of(PdfToImage()))
         .apply("Deskew", ParDo.of(Deskew()))
         .apply("Crop", ParDo.of(Crop()))
-        .apply(GroupByKey.create())
+        .apply("GroupPages", GroupByKey.create())
+        .apply("DetectSections", ParDo.of(DetectSections()))
+        .apply("GroupSections", GroupByKey.create())
         .apply("ToText", ParDo.of(ImageToText()))
 
     pipeline.run().waitUntilFinish()

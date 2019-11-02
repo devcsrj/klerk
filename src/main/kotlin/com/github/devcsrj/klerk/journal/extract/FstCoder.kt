@@ -15,21 +15,19 @@
  */
 package com.github.devcsrj.klerk.journal.extract
 
-import avro.shaded.com.google.common.primitives.Ints
-import com.github.devcsrj.klerk.Journal
 import org.apache.beam.sdk.coders.Coder
-import org.apache.beam.vendor.grpc.v1p21p0.com.google.common.io.ByteStreams
+import org.apache.beam.vendor.guava.v26_0_jre.com.google.common.io.ByteStreams
+import org.apache.beam.vendor.guava.v26_0_jre.com.google.common.primitives.Ints
 import org.nustaq.serialization.FSTConfiguration
 import java.io.EOFException
 import java.io.InputStream
 import java.io.OutputStream
 import java.nio.ByteBuffer
 
-
 /**
- * Encodes [Journal]s as an Avro generic record
+ * A beam coder using [FSTConfiguration].
  */
-internal class JournalCoder : Coder<Journal>() {
+internal open class FstCoder<T> : Coder<T>() {
 
     companion object {
 
@@ -40,23 +38,21 @@ internal class JournalCoder : Coder<Journal>() {
         private val FST = FSTConfiguration.createDefaultConfiguration()
     }
 
-
     override fun getCoderArguments(): MutableList<out Coder<*>> {
         return mutableListOf()
     }
 
     override fun verifyDeterministic() {}
 
-    override fun encode(value: Journal, outStream: OutputStream) {
+    override fun encode(value: T, outStream: OutputStream) {
         val byteArray = FST.asByteArray(value)
         val buffer = ByteBuffer.allocate(H_SIZE)
         buffer.putInt(byteArray.size)
         outStream.write(buffer.array())
         outStream.write(byteArray)
-
     }
 
-    override fun decode(inStream: InputStream): Journal {
+    override fun decode(inStream: InputStream): T {
         var buffer = ByteArray(H_SIZE)
         val read = inStream.read(buffer)
         if (read == -1)
@@ -65,6 +61,7 @@ internal class JournalCoder : Coder<Journal>() {
         val length = Ints.fromByteArray(buffer)
         buffer = ByteArray(length)
         ByteStreams.read(inStream, buffer, 0, length)
-        return FST.asObject(buffer) as Journal
+        return FST.asObject(buffer) as T
     }
+
 }

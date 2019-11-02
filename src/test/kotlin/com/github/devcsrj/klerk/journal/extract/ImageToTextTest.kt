@@ -45,7 +45,7 @@ object ImageToTextTest : Spek({
     }
     val dir = File(System.getProperty("java.io.tmpdir"))
 
-    test("Extract text from journal 3", timeout = 330 * 1000) {
+    test("Extract text from journal 3", timeout = 30 * 1000) {
 
         val resources = listOf(
             "17th-s-r3-j3-p0.png",
@@ -69,12 +69,14 @@ object ImageToTextTest : Spek({
         val pipeline = TestPipeline.create()
             .enableAbandonedNodeEnforcement(false)
         pipeline.coderRegistry.apply {
-            registerCoderForClass(Journal::class.java, JournalCoder())
+            registerCoderForClass(Journal::class.java, FstCoder<Journal>())
         }
         val output = pipeline
             .apply(Create.of(pages.shuffled()))
             .apply(MapElements.via(theirJournals))
-            .apply(GroupByKey.create())
+            .apply("GroupPagesByJournal", GroupByKey.create())
+            .apply(ParDo.of(DetectSections()))
+            .apply("GroupSectionsByJournal", GroupByKey.create())
             .apply(ParDo.of(ImageToText()))
 
         val txt = dir.resolve("journal-${journal.number}.txt")
