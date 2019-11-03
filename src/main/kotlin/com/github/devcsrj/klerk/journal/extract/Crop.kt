@@ -111,11 +111,11 @@ internal class Crop : DoFn<KV<Journal, Page>, KV<Journal, Page>>() {
     }
 
     private fun dilateContent(src: Mat): Mat {
-        val kernel = Mat.ones(10, 15, CV_8UC1).asMat()
+        val kernel = Mat.ones(10, 25, CV_8UC1).asMat()
         val dest = Mat()
         dilate(
             src, dest, kernel,
-            Point(-1, -1), 3, BORDER_CONSTANT,
+            Point(-1, -1), 2, BORDER_CONSTANT,
             morphologyDefaultBorderValue()
         )
         return dest

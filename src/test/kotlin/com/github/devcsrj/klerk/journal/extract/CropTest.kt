@@ -61,14 +61,15 @@ object CropTest : Spek({
          * Path => expected cropped dimension
          */
         val resources: Map<String, Dimension> = mapOf(
-            "17th-h-r2-j28-p2.png" to Dimension(2221, 3187),
-            "17th-s-r1-j72-p2.png" to Dimension(2333, 3126),
-            "17th-s-r1-j72-p1.png" to Dimension(2348, 3118),
-            "17th-s-r3-j16-p21.png" to Dimension(1129, 1480)
+            "17th-h-r2-j28-p2.png" to Dimension(2224, 3194),
+            "17th-s-r1-j72-p2.png" to Dimension(2336, 3133),
+            "17th-s-r1-j72-p1.png" to Dimension(2351, 3126),
+            "17th-s-r3-j16-p21.png" to Dimension(1132, 1488),
+            "17th-s-r3-j37-p24.png" to Dimension(1146, 1517)
         )
 
         resources.forEach { (resource, expected) ->
-            test("Crop $resource") {
+            test("Crop $resource", timeout = 15 * 1000) {
                 val png = "/journal/crop/$resource"
                 val prefix = resource.substringBeforeLast('.')
                 val original = dir.resolve("$prefix.png")
