@@ -15,6 +15,8 @@
  */
 package com.github.devcsrj.klerk.journal.extract
 
+import org.bytedeco.leptonica.PIX
+import org.bytedeco.leptonica.global.lept
 import org.bytedeco.opencv.global.opencv_imgproc.*
 import org.bytedeco.opencv.opencv_core.Mat
 import org.bytedeco.opencv.opencv_core.MatVector
@@ -92,4 +94,20 @@ internal fun Mat.invertColors(): Mat {
         threshold(grey, dest, 0.0, 255.0, THRESH_BINARY_INV + THRESH_OTSU)
         dest
     }
+}
+
+/**
+ * Converts this [Mat] into a leptonica [PIX] type
+ */
+internal fun Mat.toPix(): PIX {
+    val rows = this.rows()
+    val cols = this.cols()
+    val pix = lept.pixCreate(cols, rows, 8)
+    for (y in 0..rows) {
+        for (x in 0..cols) {
+            val ptr = this.ptr(y, x)
+            lept.pixSetPixel(pix, x, y, ptr.int)
+        }
+    }
+    return pix
 }

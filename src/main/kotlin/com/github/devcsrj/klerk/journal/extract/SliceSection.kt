@@ -26,25 +26,27 @@ import org.bytedeco.opencv.opencv_core.Mat
 import org.bytedeco.opencv.opencv_core.MatVector
 import org.bytedeco.opencv.opencv_core.Point
 import org.bytedeco.opencv.opencv_core.Rect
-import java.awt.Rectangle
+import org.slf4j.LoggerFactory
 
 /**
- * Loads a [Page.file] and slices the page into sections.
+ * Loads a [Page.file] and slices detected blocks of text.
  */
-internal class DetectSections : DoFn<
-        KV<Journal, Iterable<@JvmWildcard Page>>,
-        KV<Journal, PageSection>>() {
+internal class SliceSection : DoFn<
+        KV<Journal, Page>,
+        KV<Journal, PageSlice>>() {
+
+    private val logger = LoggerFactory.getLogger(SliceSection::class.java)
 
     @DoFn.ProcessElement
     fun processElement(context: ProcessContext) {
 
         val element = context.element()
         val journal = element.key!!
-        for (page in element.value) {
-            val sections = detectSections(page)
-            for (section in sections) {
-                context.output(KV.of(journal, section))
-            }
+        val page = element.value
+        logger.info("🔪 $page ($journal)")
+        val sections = detectSections(page)
+        for (section in sections) {
+            context.output(KV.of(journal, section))
         }
     }
 
@@ -52,19 +54,53 @@ internal class DetectSections : DoFn<
      * Reads the [Page.file] as image, and returns the paragraphs
      * in an order according to a two-page layout.
      */
-    private fun detectSections(page: Page): List<PageSection> {
-        imread(page.file.toString()).use { original ->
-            invertImage(original).use { inverted ->
-                dilateContent(inverted).use { dilated ->
-                    val contours = MatVector()
-                    findContours(
-                        dilated, contours,
-                        RETR_EXTERNAL, CHAIN_APPROX_SIMPLE
-                    )
-                    return detectRectangles(original, contours)
-                        .map { Rectangle(it.x(), it.y(), it.width(), it.height()) }
-                        .mapIndexed { i, rect -> PageSection(page.number, i, rect, page.file) }
+    private fun detectSections(page: Page): Sequence<PageSlice> {
+        return sequence {
+            imread(page.file.toString()).use { original ->
+                val halfWidth = original.arrayWidth() / 2
+                val rects = detectRectangles(original)
+                for ((i, rect) in rects.withIndex()) {
+                    // Slices can't be too large (i.e., bounding the entire page)
+                    val maxRect = original.size().area()
+                    if (rect.area() >= maxRect)
+                        continue
+
+                    // Expecting two-column layouts, so rectangles can't be greater than half
+                    if (rect.width() > halfWidth)
+                        continue
+
+                    try {
+                        val cropped = Mat()
+                        Mat(original, rect).use {
+                            it.copyTo(cropped)
+                        }
+                        val slice = PageSlice(
+                            page = page.number,
+                            index = i,
+                            file = page.file,
+                            mat = ImageArray.create(cropped)
+                        )
+                        yield(slice)
+                    } catch (e: Exception) {
+                        val str = rect.let {
+                            "(${it.x()}, ${it.y()}), ${it.width()} x ${it.height()}"
+                        }
+                        logger.error("⚠️ Skipped Page ${page.number} section $i ($str)", e)
+                    }
                 }
+            }
+        }
+    }
+
+    private fun detectRectangles(original: Mat): List<Rect> {
+        invertImage(original).use { inverted ->
+            dilateContent(inverted).use { dilated ->
+                val contours = MatVector()
+                findContours(
+                    dilated, contours,
+                    RETR_EXTERNAL, CHAIN_APPROX_SIMPLE
+                )
+                return detectRectangles(original, contours)
             }
         }
     }
@@ -104,12 +140,12 @@ internal class DetectSections : DoFn<
 
     private fun dilateContent(src: Mat): Mat {
         val kernel = Mat.ones(10, 25, CV_8UC1).asMat()
-        val dest = Mat()
+        val dilated = Mat()
         dilate(
-            src, dest, kernel,
-            Point(-1, -1), 3, BORDER_CONSTANT,
+            src, dilated, kernel,
+            Point(-1, -1), 2, BORDER_CONSTANT,
             morphologyDefaultBorderValue()
         )
-        return dest
+        return dilated
     }
 }

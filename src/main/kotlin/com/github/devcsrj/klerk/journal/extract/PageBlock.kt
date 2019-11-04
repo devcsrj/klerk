@@ -15,21 +15,20 @@
  */
 package com.github.devcsrj.klerk.journal.extract
 
-import java.awt.Rectangle
 import java.io.File
 import java.io.Serializable
 
-internal data class PageSection(
+internal data class PageBlock(
     val page: Int,
     val index: Int,
-    val rectangle: Rectangle,
-    val file: File
-) : Serializable, Comparable<PageSection> {
+    val file: File,
+    val content: String
+) : Serializable, Comparable<PageBlock> {
 
-    override fun compareTo(other: PageSection): Int {
+    override fun compareTo(other: PageBlock): Int {
         val i = this.page - other.page
         return if (i != 0) i else this.index - other.index
     }
 
-    override fun toString() = "Page $page, Section $index - $file"
+    override fun toString() = "Page $page, Section $index"
 }
