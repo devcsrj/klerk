@@ -1,6 +1,6 @@
 plugins {
-    id 'org.jetbrains.kotlin.jvm' version '1.3.70'
-    id 'org.jetbrains.kotlin.kapt' version '1.3.70'
+    id 'org.jetbrains.kotlin.jvm' version '1.3.61'
+    id 'org.jetbrains.kotlin.kapt' version '1.3.61'
     id "io.spring.dependency-management" version "1.0.8.RELEASE"
     id "com.github.hierynomus.license" version "0.15.0"
     id 'com.adarshr.test-logger' version '1.7.0'
@@ -12,10 +12,9 @@ version '1.0-SNAPSHOT'
 
 ext {
     beamVersion = "2.18.0"
-    javacvVersion = "1.5.1"
+    docparsrVersion = "1.0.0-SNAPSHOT"
     junit5Version = "5.5.1"
     okhttpVersion = "4.2.0"
-    pdfboxVersion = "2.0.17"
     slf4jVersion = "1.7.28"
     spekVersion = "2.0.6"
     testcontainersVersion = "1.12.5"
@@ -36,7 +35,7 @@ testSets {
 }
 
 configurations {
-    functionalTest
+    functionalTest.extendsFrom testImplementation
 }
 
 dependencyManagement {
@@ -54,19 +53,9 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.1")
     implementation("org.slf4j:slf4j-api:${slf4jVersion}")
     implementation("org.jsoup:jsoup:1.12.1")
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.10.0")
-    implementation("de.ruedigermoeller:fst:2.57")
     implementation("com.squareup.okhttp3:okhttp:${okhttpVersion}")
     implementation("com.squareup.okhttp3:okhttp-urlconnection:${okhttpVersion}")
-    implementation("org.apache.pdfbox:pdfbox:${pdfboxVersion}")
-    implementation("org.apache.pdfbox:pdfbox-tools:${pdfboxVersion}")
-    implementation("org.apache.pdfbox:jbig2-imageio:3.0.2")
-    implementation("com.github.jai-imageio:jai-imageio-jpeg2000:1.3.0")
-    implementation("org.apache.beam:beam-sdks-java-core:${beamVersion}")
-    implementation("org.apache.beam:beam-runners-direct-java:${beamVersion}")
-    implementation("org.bytedeco:opencv-platform:4.1.0-${javacvVersion}")
-    implementation("org.bytedeco:tesseract-platform:4.1.0-${javacvVersion}")
-    implementation("org.bytedeco:leptonica-platform:1.78.0-${javacvVersion}")
+    implementation("com.github.devcsrj:docparsr:${docparsrVersion}")
 
     runtimeOnly("org.slf4j:slf4j-simple:${slf4jVersion}")
 
@@ -110,20 +99,3 @@ license {
             '**/META-INF/**'
     ])
 }
-
-tasks.register("collateJournals", JavaExec) {
-    group = "Pipeline"
-    description = "Fetches and downloads all journals"
-
-    main = "com.github.devcsrj.klerk.journal.collate.PipelineKt"
-    classpath = sourceSets.main.runtimeClasspath
-}
-
-tasks.register("extractJournals", JavaExec) {
-    group = "Pipeline"
-    description = "Extracts and processes text from journals"
-
-    main = "com.github.devcsrj.klerk.journal.extract.PipelineKt"
-    classpath = sourceSets.main.runtimeClasspath
-}
-
