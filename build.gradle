@@ -11,7 +11,7 @@ group 'com.github.devcsrj'
 version '1.0-SNAPSHOT'
 
 ext {
-    beamVersion = "2.15.0"
+    beamVersion = "2.18.0"
     javacvVersion = "1.5.1"
     junit5Version = "5.5.1"
     okhttpVersion = "4.2.0"
