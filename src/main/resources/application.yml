@@ -1,0 +1,16 @@
+klerk:
+  senate:
+    uri: http://senate.gov.ph/
+    congress:
+      17:
+        - 3R
+  house:
+    uri: http://congress.gov.ph/
+    congress:
+      17:
+        - 3R
+  output-dir: build/journals/
+
+spring:
+  datasource:
+    url: "jdbc:h2:./build/klerk.db"
