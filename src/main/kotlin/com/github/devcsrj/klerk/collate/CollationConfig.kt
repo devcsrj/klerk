@@ -17,8 +17,8 @@ package com.github.devcsrj.klerk.collate
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.github.devcsrj.klerk.*
-import com.github.devcsrj.klerk.journal.HouseHttpJournalApi
-import com.github.devcsrj.klerk.journal.SenateHttpJournalApi
+import com.github.devcsrj.klerk.HouseHttpJournalApi
+import com.github.devcsrj.klerk.SenateHttpJournalApi
 import org.springframework.batch.core.Job
 import org.springframework.batch.core.Step
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory

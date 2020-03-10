@@ -13,12 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.devcsrj.klerk.journal
+package com.github.devcsrj.klerk
 
-import com.github.devcsrj.klerk.Chamber
-import com.github.devcsrj.klerk.Congress
-import com.github.devcsrj.klerk.Journal
-import com.github.devcsrj.klerk.Session
 import okhttp3.HttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import okhttp3.OkHttpClient
@@ -91,7 +87,9 @@ class HouseHttpJournalApi(private val url: URI) : JournalApi {
             .trim()
             .toIntOrNull() ?: return null
 
-        val date = LocalDate.parse(tr.child(1).text(), DATE_FORMAT)
+        val date = LocalDate.parse(tr.child(1).text(),
+            DATE_FORMAT
+        )
         val href = tr.child(2).selectFirst("a").attr("href")
         return Journal(
             chamber = Chamber.HOUSE,
