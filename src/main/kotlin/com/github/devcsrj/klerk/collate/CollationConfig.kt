@@ -15,7 +15,10 @@
  */
 package com.github.devcsrj.klerk.collate
 
-import com.github.devcsrj.klerk.*
+import com.github.devcsrj.klerk.Journal
+import com.github.devcsrj.klerk.KlerkProperties
+import com.github.devcsrj.klerk.asJson
+import com.github.devcsrj.klerk.fromJson
 import org.springframework.batch.core.Job
 import org.springframework.batch.core.Step
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory

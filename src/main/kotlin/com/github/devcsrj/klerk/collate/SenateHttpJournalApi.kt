@@ -13,8 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.devcsrj.klerk
+package com.github.devcsrj.klerk.collate
 
+import com.github.devcsrj.klerk.Chamber
+import com.github.devcsrj.klerk.Congress
+import com.github.devcsrj.klerk.Journal
+import com.github.devcsrj.klerk.Session
 import okhttp3.*
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import okhttp3.logging.HttpLoggingInterceptor

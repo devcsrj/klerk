@@ -13,7 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.devcsrj.klerk
+package com.github.devcsrj.klerk.collate
+
+import com.github.devcsrj.klerk.Congress
+import com.github.devcsrj.klerk.Journal
+import com.github.devcsrj.klerk.Session
 
 interface JournalApi {
 
