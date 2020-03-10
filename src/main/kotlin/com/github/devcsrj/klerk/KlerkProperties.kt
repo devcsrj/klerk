@@ -27,6 +27,7 @@ open class KlerkProperties {
     var senate: Senate = Senate()
     var house: House = House()
     lateinit var outputDir: Path
+    lateinit var parsrUri: URI
 
     open class Senate {
 

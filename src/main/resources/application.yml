@@ -10,7 +10,11 @@ klerk:
       17:
         - 3R
   output-dir: build/journals/
+  parsr-uri: "http://localhost:3001"
 
 spring:
   datasource:
     url: "jdbc:h2:./build/klerk.db"
+  batch:
+    job:
+      enabled: true
