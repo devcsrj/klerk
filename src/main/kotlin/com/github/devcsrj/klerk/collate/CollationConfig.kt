@@ -15,10 +15,7 @@
  */
 package com.github.devcsrj.klerk.collate
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.github.devcsrj.klerk.*
-import com.github.devcsrj.klerk.HouseHttpJournalApi
-import com.github.devcsrj.klerk.SenateHttpJournalApi
 import org.springframework.batch.core.Job
 import org.springframework.batch.core.Step
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory
@@ -62,14 +59,10 @@ open class CollationConfig(
     }
 
     @Bean
-    open fun journalJsonItemWriter(
-        props: KlerkProperties,
-        objectMapper: ObjectMapper
-    ): ItemWriter<Journal> {
+    open fun journalJsonItemWriter(props: KlerkProperties): ItemWriter<Journal> {
         val json = PathResource(props.outputDir.resolve("journals.json"))
         return JsonFileItemWriter(
-            json,
-            JsonObjectMarshaller { `object` -> objectMapper.writeValueAsString(`object`) })
+            json, JsonObjectMarshaller { `object` -> `object`.asJson() })
     }
 
     @Bean
@@ -77,7 +70,7 @@ open class CollationConfig(
         var iterator: Iterator<Journal> = Collections.emptyIterator()
 
         val senateApi = SenateHttpJournalApi(props.senate.uri)
-        val senateRequests = readCongressMap(props.senate.congress)
+        val senateRequests = props.senate.congress
         for (request in senateRequests) {
             iterator += request.value
                 .map { senateApi.fetch(request.key, it) }
@@ -85,33 +78,12 @@ open class CollationConfig(
         }
 
         val houseApi = HouseHttpJournalApi(props.house.uri)
-        val houseRequests = readCongressMap(props.house.congress)
+        val houseRequests = props.house.congress
         for (request in houseRequests) {
             iterator += request.value
                 .map { houseApi.fetch(request.key, it) }
                 .reduce { left, right -> left + right }
         }
         return IteratorItemReader(iterator)
-    }
-
-    private fun readCongressMap(source: Map<Int, List<String>>): Map<Congress, List<Session>> {
-        val map = mutableMapOf<Congress, List<Session>>()
-        for (item in source) {
-            val congress = Congress(item.key)
-            val sessions = mutableListOf<Session>()
-            for (session in item.value) {
-                check(session.length == 2) {
-                    "expecting 'Session' to be a 2-letter character like '1R' or '3S', but got $session"
-                }
-                val s = when (session[1]) {
-                    'R' -> Session.regular(session[0].toInt())
-                    'S' -> Session.special(session[0].toInt())
-                    else -> throw UnsupportedOperationException("unexpected '$session', expecting 'R' or 'S'")
-                }
-                sessions.add(s)
-            }
-            map[congress] = sessions
-        }
-        return map
     }
 }

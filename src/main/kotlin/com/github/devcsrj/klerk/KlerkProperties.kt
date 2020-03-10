@@ -31,11 +31,11 @@ open class KlerkProperties {
     open class Senate {
 
         lateinit var uri: URI
-        var congress: Map<Int, List<String>> = mutableMapOf()
+        var congress: Map<Congress, List<Session>> = mutableMapOf()
     }
 
     open class House {
         lateinit var uri: URI
-        var congress: Map<Int, List<String>> = mutableMapOf()
+        var congress: Map<Congress, List<Session>> = mutableMapOf()
     }
 }

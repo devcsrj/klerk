@@ -15,26 +15,15 @@
  */
 package com.github.devcsrj.klerk
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.module.kotlin.KotlinModule
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing
 import org.springframework.boot.SpringApplication
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.context.properties.EnableConfigurationProperties
-import org.springframework.context.annotation.Bean
 
 @SpringBootApplication
 @EnableBatchProcessing
 @EnableConfigurationProperties
-open class KlerkApp {
-
-    @Bean
-    open fun objectMapper(): ObjectMapper {
-        val mapper = ObjectMapper()
-        mapper.registerModule(KotlinModule())
-        return mapper
-    }
-}
+open class KlerkApp
 
 fun main(args: Array<String>) {
     SpringApplication.run(KlerkApp::class.java, *args)
