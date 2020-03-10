@@ -47,11 +47,7 @@ class HouseHttpJournalApi(private val url: URI) : JournalApi {
             .build()
     }
 
-    override fun fetch(congress: Congress, session: Session, offset: Int): Iterator<Journal> {
-        return readJournals(congress, session, offset).iterator()
-    }
-
-    private fun readJournals(congress: Congress, session: Session, offset: Int): Sequence<Journal> {
+    override fun fetch(congress: Congress, session: Session, offset: Int): Sequence<Journal> {
         val url = baseUrl.resolve("/legisdocs")!!
             .newBuilder()
             .addQueryParameter("v", "journals")
@@ -87,7 +83,8 @@ class HouseHttpJournalApi(private val url: URI) : JournalApi {
             .trim()
             .toIntOrNull() ?: return null
 
-        val date = LocalDate.parse(tr.child(1).text(),
+        val date = LocalDate.parse(
+            tr.child(1).text(),
             DATE_FORMAT
         )
         val href = tr.child(2).selectFirst("a").attr("href")

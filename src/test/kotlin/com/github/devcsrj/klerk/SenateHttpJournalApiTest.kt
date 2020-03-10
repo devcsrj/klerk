@@ -13,9 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.devcsrj.klerk.journal
+package com.github.devcsrj.klerk
 
-import com.github.devcsrj.klerk.*
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.hamcrest.CoreMatchers.containsString
@@ -56,7 +55,7 @@ object SenateHttpJournalApiTest : Spek({
             }
 
             When("getAll() is called") {
-                actual = api.fetch(congress, session)
+                actual = api.fetch(congress, session).iterator()
             }
 
             Then("selected session is changed") {
@@ -134,7 +133,7 @@ object SenateHttpJournalApiTest : Spek({
             }
 
             When("getAll() is called") {
-                actual = api.fetch(congress, session).next()
+                actual = api.fetch(congress, session).iterator().next()
             }
 
             Then("journal is requested") {

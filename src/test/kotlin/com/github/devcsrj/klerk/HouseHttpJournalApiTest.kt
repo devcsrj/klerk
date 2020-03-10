@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.devcsrj.klerk.journal
+package com.github.devcsrj.klerk
 
 import com.github.devcsrj.klerk.*
 import okhttp3.mockwebserver.MockWebServer
@@ -53,7 +53,7 @@ object HouseHttpJournalApiTest : Spek({
             }
 
             When("getAll() is called") {
-                actual = api.fetch(congress, session)
+                actual = api.fetch(congress, session).iterator()
             }
 
             Then("Journals are requested") {
@@ -92,11 +92,7 @@ object HouseHttpJournalApiTest : Spek({
             }
 
             When("read all") {
-                val it = api.fetch(congress, session)
-                while (it.hasNext()) {
-                    it.next()
-                    total += 1
-                }
+                total = api.fetch(congress, session).count()
             }
 
             Then("Total is correct") {
@@ -113,7 +109,7 @@ object HouseHttpJournalApiTest : Spek({
             }
 
             When("getAll() with offset 5 is called") {
-                actual = api.fetch(congress, session, offset = 5)
+                actual = api.fetch(congress, session, offset = 5).iterator()
             }
 
             Then("Iterator has next") {

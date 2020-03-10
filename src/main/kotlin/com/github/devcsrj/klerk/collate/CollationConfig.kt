@@ -29,7 +29,6 @@ import org.springframework.batch.item.support.IteratorItemReader
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.core.io.PathResource
-import java.util.*
 
 @Configuration
 open class CollationConfig(
@@ -67,7 +66,7 @@ open class CollationConfig(
 
     @Bean
     open fun journalApiItemReader(props: KlerkProperties): ItemReader<Journal> {
-        var iterator: Iterator<Journal> = Collections.emptyIterator()
+        var iterator: Sequence<Journal> = emptySequence()
 
         val senateApi = SenateHttpJournalApi(props.senate.uri)
         val senateRequests = props.senate.congress
@@ -84,6 +83,6 @@ open class CollationConfig(
                 .map { houseApi.fetch(request.key, it) }
                 .reduce { left, right -> left + right }
         }
-        return IteratorItemReader(iterator)
+        return IteratorItemReader(iterator.iterator())
     }
 }

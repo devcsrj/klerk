@@ -24,6 +24,7 @@ import org.jsoup.select.Elements
 import java.net.CookieManager
 import java.net.CookiePolicy
 import java.net.URI
+import java.time.Duration
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.regex.Pattern
@@ -70,13 +71,14 @@ class SenateHttpJournalApi(private val url: URI) : JournalApi {
         client = OkHttpClient.Builder()
             .cookieJar(JavaNetCookieJar(cookieManager))
             .addInterceptor(loggingInterceptor)
+            .readTimeout(Duration.ofSeconds(30))
             .build()
     }
 
-    override fun fetch(congress: Congress, session: Session, offset: Int): Iterator<Journal> {
+    override fun fetch(congress: Congress, session: Session, offset: Int): Sequence<Journal> {
         if (offset > 0)
             TODO()
-        return readJournals(congress, session).iterator()
+        return readJournals(congress, session)
     }
 
     private fun switchToCongressSession(congress: Congress, session: Session) {
@@ -177,7 +179,8 @@ class SenateHttpJournalApi(private val url: URI) : JournalApi {
             congress = congress,
             session = session,
             number = number,
-            date = LocalDate.parse(date,
+            date = LocalDate.parse(
+                date,
                 DATE_FORMAT
             ),
             documentUri = baseUrl.resolve(uri)!!.toUri()
