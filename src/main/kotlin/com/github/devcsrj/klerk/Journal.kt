@@ -15,6 +15,7 @@
  */
 package com.github.devcsrj.klerk
 
+import com.fasterxml.jackson.annotation.JsonFormat
 import java.io.Serializable
 import java.net.URI
 import java.time.LocalDate
@@ -24,6 +25,7 @@ data class Journal(
     val congress: Congress,
     val session: Session,
     val number: Int,
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     val date: LocalDate,
     val documentUri: URI
 ) : Serializable {

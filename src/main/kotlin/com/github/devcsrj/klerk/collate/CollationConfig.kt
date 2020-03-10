@@ -23,12 +23,13 @@ import org.springframework.batch.core.configuration.annotation.StepBuilderFactor
 import org.springframework.batch.core.launch.support.RunIdIncrementer
 import org.springframework.batch.item.ItemReader
 import org.springframework.batch.item.ItemWriter
-import org.springframework.batch.item.json.JsonFileItemWriter
-import org.springframework.batch.item.json.JsonObjectMarshaller
+import org.springframework.batch.item.file.builder.FlatFileItemWriterBuilder
+import org.springframework.batch.item.file.transform.LineAggregator
 import org.springframework.batch.item.support.IteratorItemReader
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.core.io.PathResource
+
 
 @Configuration
 open class CollationConfig(
@@ -48,20 +49,24 @@ open class CollationConfig(
     @Bean
     open fun collectRemoteJournalsStep(
         journalApiItemReader: ItemReader<Journal>,
-        journalJsonItemWriter: ItemWriter<Journal>
+        journalResourceItemWriter: ItemWriter<Journal>
     ): Step {
         return stepBuilderFactory["collectRemoteJournals"]
             .chunk<Journal, Journal>(10)
             .reader(journalApiItemReader)
-            .writer(journalJsonItemWriter)
+            .writer(journalResourceItemWriter)
             .build()
     }
 
     @Bean
-    open fun journalJsonItemWriter(props: KlerkProperties): ItemWriter<Journal> {
-        val json = PathResource(props.outputDir.resolve("journals.json"))
-        return JsonFileItemWriter(
-            json, JsonObjectMarshaller { `object` -> `object`.asJson() })
+    open fun journalResourceItemWriter(props: KlerkProperties): ItemWriter<Journal> {
+        val lineAggregator = LineAggregator<Journal> { item -> item.asJson() }
+        val resource = PathResource(props.outputDir.resolve("journals.jsonl"))
+        return FlatFileItemWriterBuilder<Journal>()
+            .name("journals")
+            .resource(resource)
+            .lineAggregator(lineAggregator)
+            .build()
     }
 
     @Bean

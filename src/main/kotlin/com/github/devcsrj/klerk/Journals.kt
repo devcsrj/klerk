@@ -37,36 +37,9 @@ internal fun directoryFor(baseDir: File, journal: Journal): File {
 }
 
 internal fun Journal.asJson(): String {
-    val format = DateTimeFormatter.ofPattern("yyyy-MM-dd")
-    return """
-    {
-        "congress": ${congress.number},
-        "chamber": "$chamber",
-        "session": {
-            "number": ${session.number},
-            "type": "${session.type}"
-        },
-        "number": $number,
-        "date": "${format.format(date)}",
-        "document_uri": "$documentUri"
-    }
-    """.trimIndent()
+    return OBJECT_MAPPER.writeValueAsString(this)
 }
 
 internal fun Journal.Companion.fromJson(str: String): Journal {
-    val map = OBJECT_MAPPER.readValue(str, object : TypeReference<Map<String, Any>>() {
-    })
-    val format = DateTimeFormatter.ofPattern("yyyy-MM-dd")
-    val session = map["session"] as Map<String, Any>
-    return Journal(
-        congress = Congress(map["congress"] as Int),
-        chamber = Chamber.valueOf(map["chamber"] as String),
-        session = Session(
-            number = session["number"] as Int,
-            type = Session.Type.valueOf(session["type"] as String)
-        ),
-        number = map["number"] as Int,
-        date = LocalDate.parse(map["date"] as String, format),
-        documentUri = URI.create(map["document_uri"] as String)
-    )
+    return OBJECT_MAPPER.readValue(str, Journal::class.java)
 }
