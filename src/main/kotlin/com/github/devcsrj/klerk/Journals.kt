@@ -33,7 +33,7 @@ internal fun directoryFor(baseDir: Path, journal: Journal): Path {
 }
 
 internal fun Journal.asJson(): String {
-    return OBJECT_MAPPER.writeValueAsString(this)
+    return OBJECT_MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(this)
 }
 
 internal fun Journal.Companion.fromJson(str: String): Journal {

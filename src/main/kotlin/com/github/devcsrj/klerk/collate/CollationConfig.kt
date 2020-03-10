@@ -17,8 +17,6 @@ package com.github.devcsrj.klerk.collate
 
 import com.github.devcsrj.klerk.Journal
 import com.github.devcsrj.klerk.KlerkProperties
-import com.github.devcsrj.klerk.asJson
-import com.github.devcsrj.klerk.fromJson
 import org.springframework.batch.core.Job
 import org.springframework.batch.core.Step
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory
@@ -26,15 +24,9 @@ import org.springframework.batch.core.configuration.annotation.StepBuilderFactor
 import org.springframework.batch.core.launch.support.RunIdIncrementer
 import org.springframework.batch.item.ItemReader
 import org.springframework.batch.item.ItemWriter
-import org.springframework.batch.item.file.LineMapper
-import org.springframework.batch.item.file.builder.FlatFileItemReaderBuilder
-import org.springframework.batch.item.file.builder.FlatFileItemWriterBuilder
-import org.springframework.batch.item.file.transform.LineAggregator
 import org.springframework.batch.item.support.IteratorItemReader
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.core.io.PathResource
-import org.springframework.core.io.Resource
 
 
 @Configuration
@@ -54,11 +46,6 @@ open class CollationConfig(
     }
 
     @Bean
-    internal open fun journalsResource(): Resource {
-        return PathResource(props.outputDir.resolve("journals.jsonl"))
-    }
-
-    @Bean
     internal open fun downloadRemoteJournalsStep(): Step {
         return stepBuilderFactory["downloadRemoteJournals"]
             .chunk<Journal, Journal>(10)
@@ -69,12 +56,7 @@ open class CollationConfig(
 
     @Bean
     internal open fun journalResourceItemReader(): ItemReader<Journal> {
-        val lineMapper = LineMapper { line, _ -> Journal.fromJson(line) }
-        return FlatFileItemReaderBuilder<Journal>()
-            .name("journalJsonlItemReader")
-            .resource(journalsResource())
-            .lineMapper(lineMapper)
-            .build()
+        return JournalInfoItemReader(props.outputDir)
     }
 
     @Bean
@@ -93,12 +75,7 @@ open class CollationConfig(
 
     @Bean
     internal open fun journalResourceItemWriter(): ItemWriter<Journal> {
-        val lineAggregator = LineAggregator<Journal> { item -> item.asJson() }
-        return FlatFileItemWriterBuilder<Journal>()
-            .name("journalJsonlItemWriter")
-            .resource(journalsResource())
-            .lineAggregator(lineAggregator)
-            .build()
+        return JournalInfoItemWriter(props.outputDir)
     }
 
     @Bean
