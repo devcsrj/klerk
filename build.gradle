@@ -57,6 +57,7 @@ dependencies {
     implementation("org.jsoup:jsoup:1.12.1")
     implementation("com.squareup.okhttp3:okhttp:${okhttpVersion}")
     implementation("com.squareup.okhttp3:okhttp-urlconnection:${okhttpVersion}")
+    implementation("com.squareup.okhttp3:logging-interceptor:${okhttpVersion}")
     implementation("com.github.devcsrj:docparsr:${docparsrVersion}")
 
     runtime("com.h2database:h2:1.4.200")

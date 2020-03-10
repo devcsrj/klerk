@@ -21,6 +21,7 @@ import com.github.devcsrj.klerk.Journal
 import com.github.devcsrj.klerk.Session
 import okhttp3.*
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
+import okhttp3.logging.HttpLoggingInterceptor
 import org.jsoup.nodes.Document
 import org.jsoup.parser.Parser
 import org.jsoup.select.Elements
@@ -64,11 +65,15 @@ class SenateHttpJournalApi(private val url: URI) : JournalApi {
     constructor() : this(URI.create("http://www.senate.gov.ph"))
 
     init {
+        val loggingInterceptor = HttpLoggingInterceptor()
+        loggingInterceptor.level = HttpLoggingInterceptor.Level.HEADERS
+
         // The site is built with ASP.NET, and relies on cookie to determine page state
         val cookieManager = CookieManager()
         cookieManager.setCookiePolicy(CookiePolicy.ACCEPT_ORIGINAL_SERVER)
         client = OkHttpClient.Builder()
             .cookieJar(JavaNetCookieJar(cookieManager))
+            .addInterceptor(loggingInterceptor)
             .build()
     }
 

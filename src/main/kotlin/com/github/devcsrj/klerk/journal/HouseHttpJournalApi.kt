@@ -23,6 +23,7 @@ import okhttp3.HttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import okhttp3.logging.HttpLoggingInterceptor
 import org.jsoup.nodes.Element
 import org.jsoup.parser.Parser
 import java.net.URI
@@ -33,7 +34,7 @@ class HouseHttpJournalApi(private val url: URI) : JournalApi {
 
     private val baseUrl: HttpUrl = url.toHttpUrlOrNull()
         ?: throw IllegalArgumentException("Not a valid url: $url")
-    private val client = OkHttpClient()
+    private val client: OkHttpClient
     private val parser = Parser.htmlParser()
 
     companion object {
@@ -41,6 +42,14 @@ class HouseHttpJournalApi(private val url: URI) : JournalApi {
     }
 
     constructor() : this(URI.create("http://www.congress.gov.ph"))
+
+    init {
+        val loggingInterceptor = HttpLoggingInterceptor()
+        loggingInterceptor.level = HttpLoggingInterceptor.Level.HEADERS
+        client = OkHttpClient.Builder()
+            .addInterceptor(loggingInterceptor)
+            .build()
+    }
 
     override fun fetch(congress: Congress, session: Session, offset: Int): Iterator<Journal> {
         return readJournals(congress, session, offset).iterator()
