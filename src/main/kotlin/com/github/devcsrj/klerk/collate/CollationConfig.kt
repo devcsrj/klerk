@@ -23,54 +23,83 @@ import org.springframework.batch.core.configuration.annotation.StepBuilderFactor
 import org.springframework.batch.core.launch.support.RunIdIncrementer
 import org.springframework.batch.item.ItemReader
 import org.springframework.batch.item.ItemWriter
+import org.springframework.batch.item.file.LineMapper
+import org.springframework.batch.item.file.builder.FlatFileItemReaderBuilder
 import org.springframework.batch.item.file.builder.FlatFileItemWriterBuilder
 import org.springframework.batch.item.file.transform.LineAggregator
 import org.springframework.batch.item.support.IteratorItemReader
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.core.io.PathResource
+import org.springframework.core.io.Resource
 
 
 @Configuration
 open class CollationConfig(
     private val jobBuilderFactory: JobBuilderFactory,
-    private val stepBuilderFactory: StepBuilderFactory
+    private val stepBuilderFactory: StepBuilderFactory,
+    private val props: KlerkProperties
 ) {
 
     @Bean
-    open fun collateJournals(collectRemoteJournalStep: Step): Job {
+    internal open fun collateJournals(): Job {
         return jobBuilderFactory.get("collateJournalsJob")
             .incrementer(RunIdIncrementer())
-            .flow(collectRemoteJournalStep)
-            .end()
+            .start(collectRemoteJournalsStep())
+            .next(downloadRemoteJournalsStep())
             .build()
     }
 
     @Bean
-    open fun collectRemoteJournalsStep(
-        journalApiItemReader: ItemReader<Journal>,
-        journalResourceItemWriter: ItemWriter<Journal>
-    ): Step {
+    internal open fun journalsResource(): Resource {
+        return PathResource(props.outputDir.resolve("journals.jsonl"))
+    }
+
+    @Bean
+    internal open fun downloadRemoteJournalsStep(): Step {
+        return stepBuilderFactory["downloadRemoteJournals"]
+            .chunk<Journal, Journal>(10)
+            .reader(journalResourceItemReader())
+            .writer(journalPdfItemWriter())
+            .build()
+    }
+
+    @Bean
+    internal open fun journalResourceItemReader(): ItemReader<Journal> {
+        val lineMapper = LineMapper { line, _ -> Journal.fromJson(line) }
+        return FlatFileItemReaderBuilder<Journal>()
+            .name("journalJsonlItemReader")
+            .resource(journalsResource())
+            .lineMapper(lineMapper)
+            .build()
+    }
+
+    @Bean
+    internal open fun journalPdfItemWriter(): ItemWriter<Journal> {
+        return JournalPdfItemWriter(props.outputDir)
+    }
+
+    @Bean
+    internal open fun collectRemoteJournalsStep(): Step {
         return stepBuilderFactory["collectRemoteJournals"]
             .chunk<Journal, Journal>(10)
-            .reader(journalApiItemReader)
-            .writer(journalResourceItemWriter)
+            .reader(journalApiItemReader())
+            .writer(journalResourceItemWriter())
             .build()
     }
 
     @Bean
-    open fun journalResourceItemWriter(props: KlerkProperties): ItemWriter<Journal> {
+    internal open fun journalResourceItemWriter(): ItemWriter<Journal> {
         val lineAggregator = LineAggregator<Journal> { item -> item.asJson() }
-        val resource = PathResource(props.outputDir.resolve("journals.jsonl"))
         return FlatFileItemWriterBuilder<Journal>()
-            .name("journals")
-            .resource(resource)
+            .name("journalJsonlItemWriter")
+            .resource(journalsResource())
             .lineAggregator(lineAggregator)
             .build()
     }
 
     @Bean
-    open fun journalApiItemReader(props: KlerkProperties): ItemReader<Journal> {
+    internal open fun journalApiItemReader(): ItemReader<Journal> {
         var iterator: Sequence<Journal> = emptySequence()
 
         val senateApi = SenateHttpJournalApi(props.senate.uri)

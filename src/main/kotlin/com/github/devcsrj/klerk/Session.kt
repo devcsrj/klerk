@@ -23,7 +23,7 @@ data class Session(
 ) : Serializable {
 
     override fun toString(): String {
-        return "$type Session $number"
+        return "${number.ordinal()} $type Session"
     }
 
     companion object {

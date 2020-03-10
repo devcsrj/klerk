@@ -15,17 +15,13 @@
  */
 package com.github.devcsrj.klerk
 
-import com.fasterxml.jackson.core.type.TypeReference
-import java.io.File
-import java.net.URI
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
+import java.nio.file.Path
 
 /**
  * Constructs the directory structure for [Journal]
  */
-internal fun directoryFor(baseDir: File, journal: Journal): File {
-    val congress = journal.congress.number.toString()
+internal fun directoryFor(baseDir: Path, journal: Journal): Path {
+    val congress = journal.congress.number.ordinal()
     val session = journal.session.let {
         "${it.type.name.toLowerCase()}-${it.number}"
     }
@@ -42,4 +38,25 @@ internal fun Journal.asJson(): String {
 
 internal fun Journal.Companion.fromJson(str: String): Journal {
     return OBJECT_MAPPER.readValue(str, Journal::class.java)
+}
+
+/**
+ * Returns the ordinal representation of this [Int]
+ */
+internal fun Int.ordinal(): String {
+    val lastDigit = this % 10
+    val lastTwoDigits = this % 100
+
+    //Returns "th" on "teen" values with the last 2 digits being between 10 and 20
+    if (lastTwoDigits in 10..20) {
+        return this.toString() + "th"
+    }
+
+    //Returns appropriate suffix on non-"teen" values
+    return when (lastDigit) {
+        1 -> this.toString() + "st"
+        2 -> this.toString() + "nd"
+        3 -> this.toString() + "rd"
+        else -> this.toString() + "th"
+    }
 }

@@ -72,6 +72,7 @@ class SenateHttpJournalApi(private val url: URI) : JournalApi {
             .cookieJar(JavaNetCookieJar(cookieManager))
             .addInterceptor(loggingInterceptor)
             .readTimeout(Duration.ofSeconds(30))
+            .connectTimeout(Duration.ofSeconds(30))
             .build()
     }
 
