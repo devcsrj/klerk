@@ -24,7 +24,6 @@ import org.springframework.batch.core.configuration.annotation.StepBuilderFactor
 import org.springframework.batch.core.launch.support.RunIdIncrementer
 import org.springframework.batch.item.ItemReader
 import org.springframework.batch.item.ItemWriter
-import org.springframework.batch.item.support.IteratorItemReader
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 
@@ -38,7 +37,7 @@ open class CollationConfig(
 
     @Bean
     internal open fun collateJournals(): Job {
-        return jobBuilderFactory.get("collateJournalsJob")
+        return jobBuilderFactory.get("collateJournals")
             .incrementer(RunIdIncrementer())
             .start(collectRemoteJournalsStep())
             .next(downloadRemoteJournalsStep())
@@ -80,23 +79,26 @@ open class CollationConfig(
 
     @Bean
     internal open fun journalApiItemReader(): ItemReader<Journal> {
-        var iterator: Sequence<Journal> = emptySequence()
+        return LazyIteratorItemReader(lazy {
+            var sequence: Sequence<Journal> = emptySequence()
 
-        val senateApi = SenateHttpJournalApi(props.senate.uri)
-        val senateRequests = props.senate.congress
-        for (request in senateRequests) {
-            iterator += request.value
-                .map { senateApi.fetch(request.key, it) }
-                .reduce { left, right -> left + right }
-        }
+            val senateApi = SenateHttpJournalApi(props.senate.uri)
+            val senateRequests = props.senate.congress
+            for (request in senateRequests) {
+                sequence += request.value
+                    .map { senateApi.fetch(request.key, it) }
+                    .reduce { left, right -> left + right }
+            }
 
-        val houseApi = HouseHttpJournalApi(props.house.uri)
-        val houseRequests = props.house.congress
-        for (request in houseRequests) {
-            iterator += request.value
-                .map { houseApi.fetch(request.key, it) }
-                .reduce { left, right -> left + right }
-        }
-        return IteratorItemReader(iterator.iterator())
+            val houseApi = HouseHttpJournalApi(props.house.uri)
+            val houseRequests = props.house.congress
+            for (request in houseRequests) {
+                sequence += request.value
+                    .map { houseApi.fetch(request.key, it) }
+                    .reduce { left, right -> left + right }
+            }
+
+            sequence.iterator()
+        })
     }
 }
