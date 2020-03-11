@@ -13,14 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.devcsrj.klerk.collate
+package com.github.devcsrj.klerk
 
-import org.springframework.batch.item.ItemReader
+import java.io.OutputStream
+import java.nio.file.Path
 
-internal class LazyIteratorItemReader<T>(val iterator: Lazy<Iterator<T>>) : ItemReader<T> {
+interface Assets {
 
-    override fun read(): T? {
-        val it = iterator.value
-        return if (it.hasNext()) it.next() else null // end of data
-    }
+    fun sink(name: String): OutputStream
+    fun file(name: String): Path
 }

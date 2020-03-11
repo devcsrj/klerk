@@ -13,14 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.devcsrj.klerk.collate
+package com.github.devcsrj.klerk
 
-import org.springframework.batch.item.ItemReader
+interface JournalRepository {
 
-internal class LazyIteratorItemReader<T>(val iterator: Lazy<Iterator<T>>) : ItemReader<T> {
-
-    override fun read(): T? {
-        val it = iterator.value
-        return if (it.hasNext()) it.next() else null // end of data
-    }
+    fun save(journal: Journal)
+    fun assets(journal: Journal): Assets
+    fun iterator(): Iterator<Journal>
 }

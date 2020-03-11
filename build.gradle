@@ -39,16 +39,6 @@ configurations {
     functionalTest.extendsFrom testImplementation
 }
 
-dependencyManagement {
-    applyMavenExclusions = false
-    generatedPomCustomization {
-        enabled = false
-    }
-    imports {
-        mavenBom("org.junit:junit-bom:${junit5Version}")
-    }
-}
-
 dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
@@ -66,12 +56,13 @@ dependencies {
 
     testImplementation("org.jetbrains.kotlin:kotlin-test")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit")
+    testImplementation("org.junit.jupiter:junit-jupiter:${junit5Version}")
     testImplementation("org.spekframework.spek2:spek-dsl-jvm:${spekVersion}")
     testImplementation("com.squareup.okhttp3:mockwebserver:${okhttpVersion}")
     testImplementation("org.hamcrest:hamcrest:2.1")
+    testImplementation("com.jayway.jsonpath:json-path-assert:2.2.0")
+    testImplementation("com.google.jimfs:jimfs:1.1")
 
-    testRuntime("org.junit.platform:junit-platform-launcher")
-    testRuntime("org.junit.jupiter:junit-jupiter")
     testRuntimeOnly("org.spekframework.spek2:spek-runner-junit5:${spekVersion}")
 
     functionalTestImplementation("org.testcontainers:testcontainers:$testcontainersVersion")
