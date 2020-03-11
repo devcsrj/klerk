@@ -19,11 +19,18 @@ import org.springframework.batch.core.configuration.annotation.EnableBatchProces
 import org.springframework.boot.SpringApplication
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.context.properties.EnableConfigurationProperties
+import org.springframework.context.annotation.Bean
 
 @SpringBootApplication
 @EnableBatchProcessing
 @EnableConfigurationProperties
-open class KlerkApp
+open class KlerkApp {
+
+    @Bean
+    internal open fun journalRepository(klerkProperties: KlerkProperties): JournalRepository {
+        return DiskJournalRepository(klerkProperties.outputDir)
+    }
+}
 
 fun main(args: Array<String>) {
     SpringApplication.run(KlerkApp::class.java, *args)

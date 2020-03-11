@@ -17,24 +17,18 @@ package com.github.devcsrj.klerk.extract
 
 import com.github.devcsrj.docparsr.Json
 import com.github.devcsrj.docparsr.ParsingResult
-import com.github.devcsrj.klerk.Journal
-import com.github.devcsrj.klerk.directoryFor
+import com.github.devcsrj.klerk.Assets
 import org.springframework.batch.item.ItemWriter
-import java.nio.file.Files
 import java.nio.file.Path
 
-internal class ParsingResultItemWriter(
-    private val outputDir: Path
-) : ItemWriter<Pair<Journal, ParsingResult>> {
+internal class ParsingResultItemWriter : ItemWriter<Pair<Assets, ParsingResult>> {
 
-    override fun write(items: MutableList<out Pair<Journal, ParsingResult>>) {
+    override fun write(items: MutableList<out Pair<Assets, ParsingResult>>) {
         items.forEach { write(it.first, it.second) }
     }
 
-    private fun write(journal: Journal, item: ParsingResult) {
-        val dir = directoryFor(outputDir, journal)
-        val file = dir.resolve("${journal.number}.parsed")
-        Files.newOutputStream(file).use { sink ->
+    private fun write(assets: Assets, item: ParsingResult) {
+        assets.sink("parsed.json").use { sink ->
             item.source(Json).use { src ->
                 src.copyTo(sink)
             }

@@ -13,24 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.devcsrj.klerk.extract
+package com.github.devcsrj.klerk
 
-import org.springframework.batch.item.ItemReader
-import java.io.File
-import java.nio.file.Files
-import java.nio.file.Path
-import kotlin.streams.toList
+object KlerkAssets {
 
-internal class DirectoryPdfItemReader(
-    private val baseDir: Path
-) : ItemReader<File> {
-
-    private val iterator: Iterator<Path> = Files.walk(baseDir)
-        .filter { it.toString().endsWith(".pdf") }
-        .toList()
-        .iterator()
-
-    override fun read(): File? {
-        return if (iterator.hasNext()) iterator.next().toFile() else null
-    }
+    const val DOCUMENT = "document.pdf"
 }

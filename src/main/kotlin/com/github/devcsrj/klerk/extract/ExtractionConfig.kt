@@ -17,22 +17,25 @@ package com.github.devcsrj.klerk.extract
 
 import com.github.devcsrj.docparsr.DocParsr
 import com.github.devcsrj.docparsr.ParsingResult
+import com.github.devcsrj.klerk.Assets
 import com.github.devcsrj.klerk.Journal
+import com.github.devcsrj.klerk.JournalRepository
 import com.github.devcsrj.klerk.KlerkProperties
 import org.springframework.batch.core.Job
 import org.springframework.batch.core.Step
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory
 import org.springframework.batch.core.launch.support.RunIdIncrementer
+import org.springframework.batch.item.support.IteratorItemReader
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import java.io.File
 
 @Configuration
 open class ExtractionConfig(
     private val jobBuilderFactory: JobBuilderFactory,
     private val stepBuilderFactory: StepBuilderFactory,
-    private val props: KlerkProperties
+    private val props: KlerkProperties,
+    private val journalRepository: JournalRepository
 ) {
 
     @Bean
@@ -45,26 +48,15 @@ open class ExtractionConfig(
 
     @Bean
     internal open fun parseJournalsStep(): Step {
+        val reader = IteratorItemReader(journalRepository.iterator())
+        val processor = JournalParsingProcessor(DocParsr.create(props.parsrUri), journalRepository)
+        val writer = ParsingResultItemWriter()
+
         return stepBuilderFactory["parseJournals"]
-            .chunk<File, Pair<Journal, ParsingResult>>(5)
-            .reader(directoryPdfItemReader())
-            .processor(journalProcessingProcessor())
-            .writer(parsingResultItemWriter())
+            .chunk<Journal, Pair<Assets, ParsingResult>>(5)
+            .reader(reader)
+            .processor(processor)
+            .writer(writer)
             .build()
-    }
-
-    @Bean
-    internal open fun directoryPdfItemReader(): DirectoryPdfItemReader {
-        return DirectoryPdfItemReader(props.outputDir)
-    }
-
-    @Bean
-    internal open fun journalProcessingProcessor(): JournalParsingProcessor {
-        return JournalParsingProcessor(DocParsr.create(props.parsrUri))
-    }
-
-    @Bean
-    internal open fun parsingResultItemWriter(): ParsingResultItemWriter {
-        return ParsingResultItemWriter(props.outputDir)
     }
 }

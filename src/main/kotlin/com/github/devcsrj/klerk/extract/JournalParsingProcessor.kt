@@ -17,24 +17,30 @@ package com.github.devcsrj.klerk.extract
 
 import com.github.devcsrj.docparsr.DocParsr
 import com.github.devcsrj.docparsr.ParsingResult
+import com.github.devcsrj.klerk.Assets
 import com.github.devcsrj.klerk.Journal
-import com.github.devcsrj.klerk.fromJson
+import com.github.devcsrj.klerk.JournalRepository
+import com.github.devcsrj.klerk.KlerkAssets
 import org.slf4j.LoggerFactory
 import org.springframework.batch.item.ItemProcessor
-import java.io.File
+import java.nio.file.Files
 
 internal class JournalParsingProcessor(
-    private val parser: DocParsr
-) : ItemProcessor<File, Pair<Journal, ParsingResult>> {
+    private val parser: DocParsr,
+    private val repository: JournalRepository
+) : ItemProcessor<Journal, Pair<Assets, ParsingResult>> {
 
     private val logger = LoggerFactory.getLogger(JournalParsingProcessor::class.java)
 
-    override fun process(item: File): Pair<Journal, ParsingResult>? {
-        val name = item.nameWithoutExtension
-        val journal = Journal.fromJson(item.parentFile.resolve("${name}.json").readText())
-        logger.info("Parsing '$journal'...")
+    override fun process(item: Journal): Pair<Assets, ParsingResult>? {
+        val assets = repository.assets(item)
+        val file = assets.file(KlerkAssets.DOCUMENT)
+        if (!Files.exists(file)) {
+            return null
+        }
 
-        val result = parser.newParsingJob(item, KlerkParsr.CONFIG).execute()
-        return Pair(journal, result)
+        logger.info("Parsing '$item'...")
+        val result = parser.newParsingJob(file.toFile(), KlerkParsr.CONFIG).execute()
+        return Pair(assets, result)
     }
 }

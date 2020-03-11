@@ -16,6 +16,7 @@
 package com.github.devcsrj.klerk.collate
 
 import com.github.devcsrj.klerk.Journal
+import com.github.devcsrj.klerk.JournalRepository
 import com.github.devcsrj.klerk.KlerkProperties
 import org.springframework.batch.core.Job
 import org.springframework.batch.core.Step
@@ -24,6 +25,8 @@ import org.springframework.batch.core.configuration.annotation.StepBuilderFactor
 import org.springframework.batch.core.launch.support.RunIdIncrementer
 import org.springframework.batch.item.ItemReader
 import org.springframework.batch.item.ItemWriter
+import org.springframework.batch.item.adapter.ItemWriterAdapter
+import org.springframework.batch.item.support.IteratorItemReader
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 
@@ -32,7 +35,8 @@ import org.springframework.context.annotation.Configuration
 open class CollationConfig(
     private val jobBuilderFactory: JobBuilderFactory,
     private val stepBuilderFactory: StepBuilderFactory,
-    private val props: KlerkProperties
+    private val props: KlerkProperties,
+    private val journalRepository: JournalRepository
 ) {
 
     @Bean
@@ -46,35 +50,32 @@ open class CollationConfig(
 
     @Bean
     internal open fun downloadRemoteJournalsStep(): Step {
+        val reader = IteratorItemReader(journalRepository.iterator())
+        val writer = JournalPdfItemWriter(journalRepository)
+
         return stepBuilderFactory["downloadRemoteJournals"]
             .chunk<Journal, Journal>(10)
-            .reader(journalResourceItemReader())
-            .writer(journalPdfItemWriter())
+            .reader(reader)
+            .writer(writer)
             .build()
     }
 
-    @Bean
-    internal open fun journalResourceItemReader(): ItemReader<Journal> {
-        return JournalInfoItemReader(props.outputDir)
-    }
-
-    @Bean
-    internal open fun journalPdfItemWriter(): ItemWriter<Journal> {
-        return JournalPdfItemWriter(props.outputDir)
-    }
 
     @Bean
     internal open fun collectRemoteJournalsStep(): Step {
         return stepBuilderFactory["collectRemoteJournals"]
             .chunk<Journal, Journal>(10)
             .reader(journalApiItemReader())
-            .writer(journalResourceItemWriter())
+            .writer(journalInfoItemWriter())
             .build()
     }
 
     @Bean
-    internal open fun journalResourceItemWriter(): ItemWriter<Journal> {
-        return JournalInfoItemWriter(props.outputDir)
+    internal open fun journalInfoItemWriter(): ItemWriter<Journal> {
+        val adapter = ItemWriterAdapter<Journal>()
+        adapter.setTargetObject(journalRepository)
+        adapter.setTargetMethod("save")
+        return adapter
     }
 
     @Bean

@@ -16,23 +16,18 @@
 package com.github.devcsrj.klerk.collate
 
 import com.github.devcsrj.klerk.Journal
-import com.github.devcsrj.klerk.directoryFor
+import com.github.devcsrj.klerk.JournalRepository
+import com.github.devcsrj.klerk.KlerkAssets
 import com.github.devcsrj.klerk.downloadTo
 import org.slf4j.LoggerFactory
 import org.springframework.batch.item.ItemWriter
 import java.nio.file.Files
-import java.nio.file.Path
 
 internal class JournalPdfItemWriter(
-    private val outputDir: Path
+    private val repository: JournalRepository
 ) : ItemWriter<Journal> {
 
     private val logger = LoggerFactory.getLogger(JournalPdfItemWriter::class.java)
-
-    init {
-        if (!Files.isDirectory(outputDir))
-            Files.createDirectories(outputDir)
-    }
 
     override fun write(items: MutableList<out Journal>) {
         items.forEach(this::write)
@@ -40,9 +35,8 @@ internal class JournalPdfItemWriter(
 
     private fun write(item: Journal) {
         logger.info("Downloading '$item'...")
-
-        val dir = directoryFor(outputDir, item)
-        val pdf = dir.resolve("${item.number}.pdf")
+        val assets = repository.assets(item)
+        val pdf = assets.file(KlerkAssets.DOCUMENT)
         if (!Files.exists(pdf))
             item.documentUri.toURL().downloadTo(pdf)
     }

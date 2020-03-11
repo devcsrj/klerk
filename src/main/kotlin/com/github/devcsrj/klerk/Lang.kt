@@ -15,11 +15,23 @@
  */
 package com.github.devcsrj.klerk
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.KotlinModule
+/**
+ * Returns the ordinal representation of this [Int]
+ */
+internal fun Int.ordinal(): String {
+    val lastDigit = this % 10
+    val lastTwoDigits = this % 100
 
-internal val OBJECT_MAPPER = ObjectMapper().apply {
-    registerModule(KotlinModule())
-    registerModule(JavaTimeModule())
+    //Returns "th" on "teen" values with the last 2 digits being between 10 and 20
+    if (lastTwoDigits in 10..20) {
+        return this.toString() + "th"
+    }
+
+    //Returns appropriate suffix on non-"teen" values
+    return when (lastDigit) {
+        1 -> this.toString() + "st"
+        2 -> this.toString() + "nd"
+        3 -> this.toString() + "rd"
+        else -> this.toString() + "th"
+    }
 }

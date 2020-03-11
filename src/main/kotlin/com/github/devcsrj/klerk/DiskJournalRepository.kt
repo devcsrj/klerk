@@ -18,12 +18,15 @@ package com.github.devcsrj.klerk
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.KotlinModule
+import org.slf4j.LoggerFactory
 import java.io.File
+import java.io.IOException
 import java.io.OutputStream
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.StandardOpenOption
 import java.util.*
+import java.util.regex.Pattern
 import kotlin.streams.toList
 
 /**
@@ -37,8 +40,10 @@ internal class DiskJournalRepository(
     companion object {
 
         private const val INFO_EXT = "json"
+        private val NAME_PATTERN = Pattern.compile("journal-[\\d]{3}\\.json")
     }
 
+    private val logger = LoggerFactory.getLogger(DiskJournalRepository::class.java)
     private val mapper: ObjectMapper = ObjectMapper().apply {
         registerModule(KotlinModule())
         registerModule(JavaTimeModule())
@@ -68,10 +73,17 @@ internal class DiskJournalRepository(
                 if (Files.isDirectory(next)) {
                     stack.addAll(Files.list(next).toList())
                 } else {
-                    val ext = next.fileName.toString().substringAfter(".")
-                    if (INFO_EXT == ext) {
-                        Files.newInputStream(next).use {
-                            yield(mapper.readValue(it, Journal::class.java))
+                    val matcher = NAME_PATTERN.matcher(next.fileName.toString())
+                    if (matcher.find()) {
+                        try {
+                            Files.newInputStream(next).use {
+                                yield(mapper.readValue(it, Journal::class.java))
+                            }
+                        } catch (e: IOException) {
+                            logger.warn(
+                                "Skipping unreadable journal '{}' (cause: {})",
+                                baseDir.relativize(next), e.message
+                            )
                         }
                     }
                 }
