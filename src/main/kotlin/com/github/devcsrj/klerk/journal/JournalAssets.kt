@@ -13,11 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.devcsrj.klerk
+package com.github.devcsrj.klerk.journal
 
-interface JournalRepository {
+object JournalAssets {
 
-    fun save(journal: Journal)
-    fun assets(journal: Journal): Assets
-    fun iterator(): Iterator<Journal>
+    const val DOCUMENT = "document.pdf"
 }

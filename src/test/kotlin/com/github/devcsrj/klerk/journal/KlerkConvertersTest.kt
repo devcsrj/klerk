@@ -13,8 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.devcsrj.klerk
+package com.github.devcsrj.klerk.journal
 
+import com.github.devcsrj.klerk.Congress
+import com.github.devcsrj.klerk.CongressConverter
+import com.github.devcsrj.klerk.Session
+import com.github.devcsrj.klerk.SessionConverter
 import org.spekframework.spek2.Spek
 import kotlin.test.assertEquals
 

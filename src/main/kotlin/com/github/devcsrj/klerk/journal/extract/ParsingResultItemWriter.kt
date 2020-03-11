@@ -13,13 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.devcsrj.klerk.extract
+package com.github.devcsrj.klerk.journal.extract
 
 import com.github.devcsrj.docparsr.Json
 import com.github.devcsrj.docparsr.ParsingResult
-import com.github.devcsrj.klerk.Assets
+import com.github.devcsrj.klerk.journal.Assets
 import org.springframework.batch.item.ItemWriter
-import java.nio.file.Path
 
 internal class ParsingResultItemWriter : ItemWriter<Pair<Assets, ParsingResult>> {
 

@@ -13,8 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.devcsrj.klerk
+package com.github.devcsrj.klerk.journal
 
+import com.github.devcsrj.klerk.Chamber
+import com.github.devcsrj.klerk.Congress
+import com.github.devcsrj.klerk.Session
 import com.google.common.jimfs.Jimfs
 import com.jayway.jsonpath.Configuration
 import com.jayway.jsonpath.matchers.JsonPathMatchers.hasJsonPath

@@ -13,13 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.devcsrj.klerk.collate
+package com.github.devcsrj.klerk.journal
 
-import com.github.devcsrj.klerk.Congress
-import com.github.devcsrj.klerk.Journal
-import com.github.devcsrj.klerk.Session
+interface JournalRepository {
 
-interface JournalApi {
-
-    fun fetch(congress: Congress, session: Session, offset: Int = 0): Sequence<Journal>
+    fun save(journal: Journal)
+    fun assets(journal: Journal): Assets
+    fun iterator(): Iterator<Journal>
 }

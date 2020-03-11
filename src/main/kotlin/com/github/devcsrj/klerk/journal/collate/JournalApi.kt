@@ -13,9 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.devcsrj.klerk
+package com.github.devcsrj.klerk.journal.collate
 
-object KlerkAssets {
+import com.github.devcsrj.klerk.Congress
+import com.github.devcsrj.klerk.Session
+import com.github.devcsrj.klerk.journal.Journal
 
-    const val DOCUMENT = "document.pdf"
+interface JournalApi {
+
+    fun fetch(congress: Congress, session: Session, offset: Int = 0): Sequence<Journal>
 }

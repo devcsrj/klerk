@@ -13,9 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.devcsrj.klerk.collate
+package com.github.devcsrj.klerk.journal.collate
 
 import com.github.devcsrj.klerk.*
+import com.github.devcsrj.klerk.journal.Journal
 import okhttp3.mockwebserver.MockWebServer
 import org.spekframework.spek2.Spek
 import org.spekframework.spek2.style.gherkin.Feature

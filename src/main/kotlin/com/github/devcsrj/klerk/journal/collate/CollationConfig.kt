@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.devcsrj.klerk.collate
+package com.github.devcsrj.klerk.journal.collate
 
-import com.github.devcsrj.klerk.Journal
-import com.github.devcsrj.klerk.JournalRepository
 import com.github.devcsrj.klerk.KlerkProperties
+import com.github.devcsrj.klerk.journal.Journal
+import com.github.devcsrj.klerk.journal.JournalRepository
 import org.springframework.batch.core.Job
 import org.springframework.batch.core.Step
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory

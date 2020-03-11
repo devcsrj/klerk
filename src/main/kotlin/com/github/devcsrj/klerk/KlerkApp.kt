@@ -15,6 +15,8 @@
  */
 package com.github.devcsrj.klerk
 
+import com.github.devcsrj.klerk.journal.DiskJournalRepository
+import com.github.devcsrj.klerk.journal.JournalRepository
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing
 import org.springframework.boot.SpringApplication
 import org.springframework.boot.autoconfigure.SpringBootApplication

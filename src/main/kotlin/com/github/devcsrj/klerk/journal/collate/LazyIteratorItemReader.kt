@@ -13,26 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.devcsrj.klerk
+package com.github.devcsrj.klerk.journal.collate
 
-import com.fasterxml.jackson.annotation.JsonFormat
-import java.io.Serializable
-import java.net.URI
-import java.time.LocalDate
+import org.springframework.batch.item.ItemReader
 
-data class Journal(
-    val chamber: Chamber,
-    val congress: Congress,
-    val session: Session,
-    val number: Int,
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
-    val date: LocalDate,
-    val documentUri: URI
-) : Serializable {
+internal class LazyIteratorItemReader<T>(val iterator: Lazy<Iterator<T>>) : ItemReader<T> {
 
-    companion object {}
-
-    override fun toString(): String {
-        return "($congress | $session) $chamber Journal $number - $date"
+    override fun read(): T? {
+        val it = iterator.value
+        return if (it.hasNext()) it.next() else null // end of data
     }
 }

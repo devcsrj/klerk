@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.devcsrj.klerk.collate
+package com.github.devcsrj.klerk.journal.collate
 
-import com.github.devcsrj.klerk.Journal
-import com.github.devcsrj.klerk.JournalRepository
-import com.github.devcsrj.klerk.KlerkAssets
+import com.github.devcsrj.klerk.journal.Journal
+import com.github.devcsrj.klerk.journal.JournalAssets
+import com.github.devcsrj.klerk.journal.JournalRepository
 import me.tongfei.progressbar.DelegatingProgressBarConsumer
 import me.tongfei.progressbar.ProgressBarBuilder
 import okhttp3.*
@@ -48,7 +48,7 @@ internal class JournalPdfItemWriter(
     private fun write(item: Journal) {
         logger.info("Downloading '$item'...")
         val assets = repository.assets(item)
-        val pdf = assets.file(KlerkAssets.DOCUMENT)
+        val pdf = assets.file(JournalAssets.DOCUMENT)
         if (Files.exists(pdf))
             return
 

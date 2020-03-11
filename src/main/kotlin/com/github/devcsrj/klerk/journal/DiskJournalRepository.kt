@@ -13,13 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.devcsrj.klerk
+package com.github.devcsrj.klerk.journal
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.KotlinModule
+import com.github.devcsrj.klerk.ordinal
 import org.slf4j.LoggerFactory
-import java.io.File
 import java.io.IOException
 import java.io.OutputStream
 import java.nio.file.Files
@@ -110,7 +110,8 @@ internal class DiskJournalRepository(
         return "journal-" + "${journal.number}".padStart(3, '0')
     }
 
-    private inner class DiskAssets(private val journal: Journal) : Assets {
+    private inner class DiskAssets(private val journal: Journal) :
+        Assets {
 
         override fun sink(name: String): OutputStream {
             return Files.newOutputStream(
