@@ -54,7 +54,7 @@ open class CollationConfig(
         val writer = JournalPdfItemWriter(journalRepository)
 
         return stepBuilderFactory["downloadRemoteJournals"]
-            .chunk<Journal, Journal>(10)
+            .chunk<Journal, Journal>(5)
             .reader(reader)
             .writer(writer)
             .build()

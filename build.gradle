@@ -48,6 +48,7 @@ dependencies {
     implementation("com.squareup.okhttp3:okhttp:${okhttpVersion}")
     implementation("com.squareup.okhttp3:okhttp-urlconnection:${okhttpVersion}")
     implementation("com.squareup.okhttp3:logging-interceptor:${okhttpVersion}")
+    implementation("me.tongfei:progressbar:0.8.1")
     implementation("com.github.devcsrj:docparsr:${docparsrVersion}")
 
     runtime("com.h2database:h2:1.4.200")
