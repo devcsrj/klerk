@@ -15,23 +15,17 @@
  */
 package com.github.devcsrj.klerk.journal.extract
 
-import com.github.devcsrj.docparsr.Json
-import com.github.devcsrj.docparsr.ParsingResult
-import com.github.devcsrj.klerk.journal.Assets
-import com.github.devcsrj.klerk.journal.JournalAssets
+import com.github.devcsrj.klerk.bill.BillEvent
+import com.github.devcsrj.klerk.bill.BillEventRepository
 import org.springframework.batch.item.ItemWriter
 
-internal class ParsingResultItemWriter : ItemWriter<Pair<Assets, ParsingResult>> {
+internal class BillEventItemWriter(
+    private val repo: BillEventRepository
+) : ItemWriter<List<BillEvent>> {
 
-    override fun write(items: MutableList<out Pair<Assets, ParsingResult>>) {
-        items.forEach { write(it.first, it.second) }
-    }
-
-    private fun write(assets: Assets, item: ParsingResult) {
-        assets.sink(JournalAssets.PARSING_RESULT).use { sink ->
-            item.source(Json).use { src ->
-                src.copyTo(sink)
-            }
+    override fun write(items: MutableList<out List<BillEvent>>) {
+        items.flatten().forEach {
+            repo.save(it)
         }
     }
 }

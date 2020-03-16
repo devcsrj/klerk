@@ -18,6 +18,8 @@ package com.github.devcsrj.klerk.journal.extract
 import com.github.devcsrj.docparsr.DocParsr
 import com.github.devcsrj.docparsr.ParsingResult
 import com.github.devcsrj.klerk.KlerkProperties
+import com.github.devcsrj.klerk.bill.BillEvent
+import com.github.devcsrj.klerk.bill.BillEventRepository
 import com.github.devcsrj.klerk.journal.Assets
 import com.github.devcsrj.klerk.journal.Journal
 import com.github.devcsrj.klerk.journal.JournalRepository
@@ -35,7 +37,8 @@ open class ExtractionConfig(
     private val jobBuilderFactory: JobBuilderFactory,
     private val stepBuilderFactory: StepBuilderFactory,
     private val props: KlerkProperties,
-    private val journalRepository: JournalRepository
+    private val journalRepository: JournalRepository,
+    private val billEventRepository: BillEventRepository
 ) {
 
     @Bean
@@ -43,6 +46,7 @@ open class ExtractionConfig(
         return jobBuilderFactory.get("extractJournals")
             .incrementer(RunIdIncrementer())
             .start(parseJournalsStep())
+            .next(scrapeFirstReadingEventsStep())
             .build()
     }
 
@@ -54,6 +58,20 @@ open class ExtractionConfig(
 
         return stepBuilderFactory["parseJournals"]
             .chunk<Journal, Pair<Assets, ParsingResult>>(5)
+            .reader(reader)
+            .processor(processor)
+            .writer(writer)
+            .build()
+    }
+
+    @Bean
+    internal open fun scrapeFirstReadingEventsStep(): Step {
+        val reader = IteratorItemReader(journalRepository.iterator())
+        val processor = FirstReadingProcessor(journalRepository)
+        val writer = BillEventItemWriter(billEventRepository)
+
+        return stepBuilderFactory["scrapeFirstReadingEvents"]
+            .chunk<Journal, List<BillEvent>>(1)
             .reader(reader)
             .processor(processor)
             .writer(writer)

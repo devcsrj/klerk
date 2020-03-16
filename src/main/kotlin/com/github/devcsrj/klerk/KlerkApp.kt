@@ -15,6 +15,8 @@
  */
 package com.github.devcsrj.klerk
 
+import com.github.devcsrj.klerk.bill.BillEventRepository
+import com.github.devcsrj.klerk.bill.DiskBillEventRepository
 import com.github.devcsrj.klerk.journal.DiskJournalRepository
 import com.github.devcsrj.klerk.journal.JournalRepository
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing
@@ -31,6 +33,11 @@ open class KlerkApp {
     @Bean
     internal open fun journalRepository(klerkProperties: KlerkProperties): JournalRepository {
         return DiskJournalRepository(klerkProperties.outputDir)
+    }
+
+    @Bean
+    internal open fun billEventRepository(klerkProperties: KlerkProperties): BillEventRepository {
+        return DiskBillEventRepository(klerkProperties.outputDir)
     }
 }
 

@@ -44,7 +44,7 @@ object DiskBillEventRepositoryTest : Spek({
         val repo = DiskBillEventRepository(baseDir)
         repo.afterPropertiesSet()
 
-        val event = BillTestEvent("id", LocalDate.of(2020, 1, 1), BillId(Chamber.SENATE, 999))
+        val event = BillTestEvent(LocalDate.of(2020, 1, 1), BillId(Chamber.SENATE, 999))
         repo.save(event)
         repo.save(event)
 
@@ -53,13 +53,12 @@ object DiskBillEventRepositoryTest : Spek({
         assertThat(lines, hasSize(2))
         assertThat(
             lines[0],
-            equalTo("{\"id\":\"id\",\"timestamp\":[2020,1,1],\"billId\":{\"chamber\":\"SENATE\",\"number\":999}}")
+            equalTo("{\"timestamp\":[2020,1,1],\"billId\":{\"chamber\":\"SENATE\",\"number\":999}}")
         )
     }
 })
 
 data class BillTestEvent(
-    val id: String,
     val timestamp: LocalDate,
     val billId: BillId
-) : BillEvent(id, timestamp, "bill-test", billId)
+) : BillEvent(timestamp, "bill-test", billId)

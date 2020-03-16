@@ -19,18 +19,16 @@ import com.fasterxml.jackson.annotation.JsonFormat
 import java.time.LocalDate
 
 open class BillEvent(
-    id: String,
     timestamp: LocalDate,
     type: String,
     billId: BillId
 )
 
 data class BillIntroducedEvent(
-    val id: String,
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     val timestamp: LocalDate,
     val billId: BillId,
     val title: String,
     val by: Author,
     val to: List<Committee>
-) : BillEvent(id, timestamp, "bill-introduced", billId)
+) : BillEvent(timestamp, "bill-introduced", billId)

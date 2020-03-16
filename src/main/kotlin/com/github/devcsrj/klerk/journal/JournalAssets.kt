@@ -15,7 +15,8 @@
  */
 package com.github.devcsrj.klerk.journal
 
-object JournalAssets {
+internal object JournalAssets {
 
     const val DOCUMENT = "document.pdf"
+    const val PARSING_RESULT = "parsed.json"
 }

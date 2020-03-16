@@ -63,13 +63,13 @@ internal object KlerkParsr {
         const val HEADING_LABEL = "${PREFIX}HEADING"
         const val HEADING_REGEX = "BILLS ON FIRST READING"
 
-        const val BILL_LINE_LABEL = "${PREFIX}SENATE_BILL"
-        const val BILL_LINE_REGEX = "Senate Bill No\\\\. (\\\\d+), entitled"
+        const val BILL_LINE_LABEL = "${PREFIX}BILL"
+        const val BILL_LINE_REGEX = "Bill No\\. (\\d+), entitled"
 
         const val INTRODUCER_LABEL = "${PREFIX}INTRODUCER"
         const val INTRODUCER_REGEX = "Introduced by (.+)"
 
         const val RECEIVING_COMMITTEE_LABEL = "${PREFIX}RECEIVING"
-        const val RECEIVING_COMMITTEE_REGEX = "To the Committees (.+)"
+        const val RECEIVING_COMMITTEE_REGEX = "To the Committees on (.+)"
     }
 }
