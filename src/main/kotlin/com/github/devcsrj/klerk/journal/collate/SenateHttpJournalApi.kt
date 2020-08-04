@@ -179,6 +179,10 @@ class SenateHttpJournalApi(private val url: URI) : JournalApi {
             matcher.group(1)
         }
 
+        val documentUri = baseUrl.resolve(uri)!!.toUri()
+        check(documentUri.toString().endsWith(".pdf")) {
+            "Expecting a PDF url, but got '$documentUri'"
+        }
         return Journal(
             chamber = Chamber.SENATE,
             congress = congress,
@@ -188,7 +192,7 @@ class SenateHttpJournalApi(private val url: URI) : JournalApi {
                 date,
                 DATE_FORMAT
             ),
-            documentUri = baseUrl.resolve(uri)!!.toUri()
+            documentUri = documentUri
         )
 
     }
