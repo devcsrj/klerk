@@ -88,7 +88,7 @@ open class CollationConfig(
             for (request in senateRequests) {
                 sequence += request.value
                     .map { senateApi.fetch(request.key, it) }
-                    .reduce { left, right -> left + right }
+                    .fold(emptySequence(), { r: Sequence<Journal>, t -> r + t})
             }
 
             val houseApi = HouseHttpJournalApi(props.house.uri)
@@ -96,7 +96,7 @@ open class CollationConfig(
             for (request in houseRequests) {
                 sequence += request.value
                     .map { houseApi.fetch(request.key, it) }
-                    .reduce { left, right -> left + right }
+                    .fold(emptySequence(), { r: Sequence<Journal>, t -> r + t })
             }
 
             sequence.iterator()
