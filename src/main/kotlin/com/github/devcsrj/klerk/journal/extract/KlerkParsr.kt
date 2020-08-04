@@ -29,10 +29,9 @@ internal object KlerkParsr {
             ReadingOrderDetection(
                 minColumnWidthInPagePercent = 30.0
             ),
-            WordsToLine(),
+            WordsToLineNew,
             LinesToParagraph(),
-            HeadingDetection,
-            HeadingDetectionDt,
+            MlHeadingDetection,
             PageNumberDetection,
             HierarchyDetection,
             RegexMatcher(
