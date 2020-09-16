@@ -19,4 +19,8 @@ internal object JournalAssets {
 
     const val DOCUMENT = "document.pdf"
     const val PARSED_TEXT = "parsed.txt"
+
+    fun DOCUMENT_PAGE(page: Int, ext: String): String {
+        return "page-" + "$page".padStart(3, '0') + ext
+    }
 }

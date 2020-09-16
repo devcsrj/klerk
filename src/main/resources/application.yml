@@ -19,5 +19,6 @@ spring:
     job:
       enabled: true
 #      names: collateJournals,extractJournals
-      names: extractJournals
+#      names: extractJournals
 #      names: collateJournals
+      names: preProcessJournals
