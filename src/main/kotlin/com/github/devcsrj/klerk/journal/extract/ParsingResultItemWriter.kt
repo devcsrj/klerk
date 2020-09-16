@@ -15,7 +15,7 @@
  */
 package com.github.devcsrj.klerk.journal.extract
 
-import com.github.devcsrj.docparsr.Json
+import com.github.devcsrj.docparsr.Text
 import com.github.devcsrj.docparsr.ParsingResult
 import com.github.devcsrj.klerk.journal.Assets
 import com.github.devcsrj.klerk.journal.JournalAssets
@@ -28,8 +28,8 @@ internal class ParsingResultItemWriter : ItemWriter<Pair<Assets, ParsingResult>>
     }
 
     private fun write(assets: Assets, item: ParsingResult) {
-        assets.sink(JournalAssets.PARSING_RESULT).use { sink ->
-            item.source(Json).use { src ->
+        assets.sink(JournalAssets.PARSED_TEXT).use { sink ->
+            item.source(Text).use { src ->
                 src.copyTo(sink)
             }
         }

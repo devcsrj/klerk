@@ -31,20 +31,12 @@ internal class FirstReadingProcessor(
     companion object {
 
         @JvmStatic
-        private val labels = setOf(
-            KlerkParsr.FirstReading.BILL_LINE_LABEL,
-            KlerkParsr.FirstReading.HEADING_LABEL,
-            KlerkParsr.FirstReading.INTRODUCER_LABEL,
-            KlerkParsr.FirstReading.RECEIVING_COMMITTEE_LABEL
-        )
-
-        @JvmStatic
         private val logger = LoggerFactory.getLogger(FirstReadingProcessor::class.java)
     }
 
     override fun process(item: Journal): List<BillEvent> {
         val assets = repository.assets(item)
-        val file = assets.file(JournalAssets.PARSING_RESULT)
+        val file = assets.file(JournalAssets.PARSED_TEXT)
         if (!Files.exists(file)) {
             return emptyList()
         }
