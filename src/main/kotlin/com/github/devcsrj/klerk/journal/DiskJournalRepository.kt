@@ -20,12 +20,14 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.github.devcsrj.klerk.ordinal
 import org.slf4j.LoggerFactory
+import java.io.File
 import java.io.IOException
 import java.io.OutputStream
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.StandardOpenOption
 import java.util.*
+import java.util.function.Predicate
 import java.util.regex.Pattern
 import kotlin.streams.toList
 
@@ -122,7 +124,23 @@ internal class DiskJournalRepository(
         }
 
         override fun file(name: String): Path {
-            return directoryFor(journal).resolve("${simpleNameOf(journal)}__$name")
+            return directoryFor(journal).resolve("${prefix()}$name")
         }
+
+        override fun list(filenameFilter: Predicate<String>): List<Path> {
+            return Files.list(directoryFor(journal))
+                .filter(this::ownsFile)
+                .filter { matchesFilter(it, filenameFilter) }
+                .toList()
+        }
+
+        private fun ownsFile(file: Path) = file.fileName.toString().startsWith(prefix())
+
+        private fun matchesFilter(file: Path, filenameFilter: Predicate<String>): Boolean {
+            val suffix = file.fileName.toString().substringAfter(prefix())
+            return filenameFilter.test(suffix)
+        }
+
+        private fun prefix() = "${simpleNameOf(journal)}__"
     }
 }

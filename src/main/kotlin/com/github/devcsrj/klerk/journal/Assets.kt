@@ -17,9 +17,20 @@ package com.github.devcsrj.klerk.journal
 
 import java.io.OutputStream
 import java.nio.file.Path
+import java.util.function.Predicate
 
 interface Assets {
 
+    companion object {
+
+        val EMPTY = object : Assets {
+            override fun sink(name: String) = throw UnsupportedOperationException()
+            override fun file(name: String) = throw UnsupportedOperationException()
+            override fun list(filenameFilter: Predicate<String>) = emptyList<Path>()
+        }
+    }
+
     fun sink(name: String): OutputStream
     fun file(name: String): Path
+    fun list(filenameFilter: Predicate<String>): List<Path>
 }

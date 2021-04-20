@@ -13,18 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.devcsrj.klerk.journal
+package com.github.devcsrj.klerk.journal.preprocess
 
-import java.util.regex.Pattern
+import com.github.devcsrj.klerk.journal.Journal
+import com.github.devcsrj.klerk.journal.JournalRepository
+import org.springframework.batch.item.ItemWriter
 
-internal object JournalAssets {
+/**
+ * Detects the layouts on each pages
+ */
+internal class LayoutDetectingWriter(
+    private val repository: JournalRepository
+) : ItemWriter<Journal> {
 
-    const val DOCUMENT = "document.pdf"
-    const val PARSED_TEXT = "parsed.txt"
-
-    fun documentPagePng(page: Int): String {
-        return "page-" + "$page".padStart(3, '0') + ".png"
+    override fun write(items: MutableList<out Journal>) {
+        TODO("Not yet implemented")
     }
 
-    fun documentPagePngFilter() = Pattern.compile("page-\\d{3}\\.png").asPredicate()
 }
