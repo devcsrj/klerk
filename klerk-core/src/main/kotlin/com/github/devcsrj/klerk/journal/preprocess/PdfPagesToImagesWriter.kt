@@ -18,16 +18,13 @@ package com.github.devcsrj.klerk.journal.preprocess
 import com.github.devcsrj.klerk.journal.Journal
 import com.github.devcsrj.klerk.journal.JournalAssets
 import com.github.devcsrj.klerk.journal.JournalRepository
-import com.github.devcsrj.klerk.journal.extract.FirstReadingProcessor
 import org.apache.pdfbox.io.MemoryUsageSetting
 import org.apache.pdfbox.pdmodel.PDDocument
 import org.apache.pdfbox.rendering.ImageType
 import org.apache.pdfbox.rendering.PDFRenderer
 import org.apache.pdfbox.tools.imageio.ImageIOUtil
 import org.slf4j.LoggerFactory
-import org.springframework.batch.item.ItemProcessor
 import org.springframework.batch.item.ItemWriter
-import java.io.File
 import java.nio.file.Files
 
 /**

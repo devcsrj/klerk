@@ -1,0 +1,58 @@
+plugins {
+    id "org.springframework.boot" version "2.2.5.RELEASE"
+    id "io.spring.dependency-management" version "1.0.8.RELEASE"
+    id 'com.adarshr.test-logger' version '1.7.0'
+    id "org.unbroken-dome.test-sets" version "2.2.1"
+}
+
+bootJar {
+    mainClassName = 'com.github.devcsrj.klerk.KlerkAppKt'
+}
+
+ext {
+    beamVersion = "2.18.0"
+    javacvVersion = "1.5.1"
+    docparsrVersion = "1.0.0-SNAPSHOT"
+    junit5Version = "5.5.1"
+    okhttpVersion = "4.2.0"
+    pdfboxVersion = "2.0.17"
+    slf4jVersion = "1.7.28"
+    testcontainersVersion = "1.12.5"
+}
+
+testSets {
+    functionalTest
+}
+
+configurations {
+    functionalTest.extendsFrom testImplementation
+}
+
+dependencies {
+    implementation("org.springframework.boot:spring-boot-starter-batch")
+    implementation("org.jsoup:jsoup:1.12.1")
+    implementation("com.squareup.okhttp3:okhttp:${okhttpVersion}")
+    implementation("com.squareup.okhttp3:okhttp-urlconnection:${okhttpVersion}")
+    implementation("com.squareup.okhttp3:logging-interceptor:${okhttpVersion}")
+    implementation("org.apache.pdfbox:pdfbox:${pdfboxVersion}")
+    implementation("org.apache.pdfbox:pdfbox-tools:${pdfboxVersion}")
+    implementation("org.apache.pdfbox:jbig2-imageio:3.0.2")
+    implementation("org.bytedeco:opencv-platform:4.1.0-${javacvVersion}")
+    implementation("me.tongfei:progressbar:0.8.1")
+    implementation("com.github.devcsrj:docparsr:${docparsrVersion}")
+
+    runtime("com.h2database:h2:1.4.200")
+
+    annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
+    
+    testImplementation("org.junit.jupiter:junit-jupiter:${junit5Version}")
+    testImplementation("org.spekframework.spek2:spek-dsl-jvm:${spekVersion}")
+    testImplementation("com.squareup.okhttp3:mockwebserver:${okhttpVersion}")
+    testImplementation("org.hamcrest:hamcrest:2.1")
+    testImplementation("com.jayway.jsonpath:json-path-assert:2.2.0")
+    testImplementation("com.google.jimfs:jimfs:1.1")
+
+    testRuntimeOnly("org.spekframework.spek2:spek-runner-junit5:${spekVersion}")
+
+    functionalTestImplementation("org.testcontainers:testcontainers:$testcontainersVersion")
+}
