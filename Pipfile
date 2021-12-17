@@ -1,0 +1,15 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+layoutparser = {extras = ["effdet", "ocr"], version = "*"}
+torchvision = "*"
+detectron2 = {ref = "v0.5", git = "https://github.com/facebookresearch/detectron2.git"}
+
+[dev-packages]
+jupyter = "*"
+
+[requires]
+python_version = "3.8"
