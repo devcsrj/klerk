@@ -10,6 +10,7 @@ detectron2 = {ref = "v0.5", git = "https://github.com/facebookresearch/detectron
 setuptools = "*"
 wheel = "*"
 spacy = "*"
+bonobo = "*"
 
 [dev-packages]
 jupyter = "*"
