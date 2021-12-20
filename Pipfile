@@ -7,6 +7,9 @@ name = "pypi"
 layoutparser = {extras = ["effdet", "ocr"], version = "*"}
 torchvision = "*"
 detectron2 = {ref = "v0.5", git = "https://github.com/facebookresearch/detectron2.git"}
+setuptools = "*"
+wheel = "*"
+spacy = "*"
 
 [dev-packages]
 jupyter = "*"
