@@ -255,4 +255,4 @@ cython_debug/
 # End of https://www.toptal.com/developers/gitignore/api/linux,python,intellij+iml,jupyternotebooks
 
 input/
-output/
+output/.pdm-python
