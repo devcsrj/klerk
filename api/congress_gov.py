@@ -1,8 +1,12 @@
+import os
 from dataclasses import dataclass
 from datetime import date, datetime
 from bs4 import BeautifulSoup
+from tqdm.auto import tqdm
 
 import requests
+
+import shutil
 
 
 @dataclass(frozen=True)
@@ -13,8 +17,28 @@ class Journal:
     date: date
     url: str
 
+    def get_name(self):
+        return f"{self.congress}-R{self.session}-{self.label}"
+
+    def download_to(self, dir):
+        """
+        Download the journal to the given path
+
+        :param str dir: The path to download the journal to
+        """
+        dest = os.path.join(dir, self.get_name()) + ".pdf"
+        # https://www.alpharithms.com/progress-bars-for-python-downloads-580122/#tqdm-implementation
+        with requests.get(self.url, stream=True) as r:
+            r.raise_for_status()
+
+            total_length = int(r.headers.get("Content-Length"))
+            with tqdm.wrapattr(r.raw, "read", total=total_length, desc=self.get_name()) as raw:
+                with open(f"{os.path.basename(dest)}", 'wb') as output:
+                    shutil.copyfileobj(raw, output)
+
     def __str__(self):
-        return f"{self.congress}-R{self.session}-{self.label} ({datetime.strftime(self.date, '%Y-%m-%d')})"
+        return f"{self.get_name()} ({datetime.strftime(self.date, '%Y-%m-%d')})"
+
 
 class CongressGov:
     """
@@ -61,5 +85,9 @@ class CongressGov:
 
 if __name__ == "__main__":
     cg = CongressGov()
+
+    journals = []
     for journal in cg.get_journals(congress=18, session=3):
-        print(journal)
+        journals.append(journal)
+
+    journals[0].download_to("downloads")
